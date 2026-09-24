@@ -190,6 +190,20 @@ backend:
           comment: "Media endpoints fully functional: (1) Upload valid PNG successful with file ID returned. (2) Download file returns correct content with proper headers. (3) Delete unattached evidence working. (4) Emergent object storage integration working correctly with lazy initialization. All tests passed."
 
 frontend:
+  - task: "Landing hero cinematic intro animation (NEW)"
+    implemented: true
+    working: true
+    file: "pages/Landing.jsx, components/IntroAnimation.jsx, pages/intro.css"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "NEW isolated cinematic intro on the landing page hero ONLY. On first visit a ~4.3s canvas animation plays (darkened city comes into focus, community signal points pulse, connection lines link them, a central CityPulse pulse, wordmark, then the existing hero content reveals with staggered fades). Final frame is IDENTICAL to the original hero (verified via screenshot + DOM: class becomes cp-reveal, overlay unmounts, hero-title/description visible opacity 1). Persistence via localStorage 'citypulse-intro-v1' -> returning visits do a quick reveal, no full intro. Respects prefers-reduced-motion (overlay hidden, hero shown instantly). Non-blocking: any wheel/touch/key/pointer interaction gracefully finishes the intro. Safety timeout (6.5s) forces reveal. NO existing hero content/wording/typography/routes changed. Need to verify: intro plays on first load, hero reveals correctly and matches original, returning visit skips it, existing nav links (How it works, FAQs, Enter Society, Create Society) + hero CTA still navigate, other sections (society-access, how-it-works, FAQ accordion) still work, and no console errors."
+        - working: true
+          agent: "testing"
+          comment: "Comprehensive testing completed with 7 test scenarios. ALL TESTS PASSED. (1) FIRST VISIT INTRO: Intro overlay present immediately after load, hero has 'cp-hide' class during intro (content hidden), intro overlay removed from DOM after ~5s, hero transitions to 'cp-reveal' class, all hero elements visible with correct text, localStorage flag set. (2) FINAL FRAME MATCHES ORIGINAL: All elements verified - eyebrow 'CONNECTED COMMUNITIES. BETTER EVERYDAYS.', title 'A better neighborhood. Starts with us.', CTA 'Find your community', scroll text 'A little awareness. A lasting difference.', index '01 — CITYPULSE'. (3) NON-BLOCKING INTERACTION: Both click and scroll interactions gracefully skip intro, overlay removed, hero visible, page responsive. (4) RETURNING VISIT: With localStorage flag set, hero visible in ~1.1s (< 2.5s target), no long-lived intro overlay, full intro does NOT replay. (5) REGRESSION: All navigation working - Enter/Create Society links, hero CTA, anchor links (How it works, FAQs), FAQ accordion, society access cards. (6) CANVAS ELEMENTS: All animation elements present - city background with correct image, canvas with valid dimensions (1880x555), veil, wordmark 'CityPulse.'. (7) CONSOLE: No JavaScript errors, no React warnings. Feature is production-ready with no regressions."
   - task: "Full frontend UI"
     implemented: true
     working: "NA"
@@ -205,7 +219,7 @@ frontend:
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 2
+  test_sequence: 3
   run_ui: false
 
 test_plan:
@@ -223,3 +237,7 @@ agent_communication:
       message: "NEW FEATURE ADDED: Email & password login as an additional option alongside the existing Society Code + username login. Please test the backend auth: (1) POST /api/auth/register now requires exactly fields society_code, name, email, username, password, area (extra='forbid') - email must be globally unique; (2) POST /api/auth/login-email {email,password} authenticates by email only (no society code) and returns same {token,user,society} shape; (3) duplicate email registration returns 409; (4) invalid email format returns 422; (5) wrong password on login-email returns 401; (6) REGRESSION CHECK: existing POST /api/auth/login (society_code+username+password) and all 4 demo accounts still work (society_code=GV-48291, password=CityPulse2025!, usernames owner/blockb.admin/utilities.admin/elena). Note: test user testuser1@example.com / testpass123 may already exist from manual curl testing."
     - agent: "testing"
       message: "Focused email authentication testing completed. All 9 tests PASSED with no failures. NEW email login feature fully functional: (1) Registration with email works (201), email stored correctly, (2) Login-email endpoint works (200) with same response shape as society login, (3) Duplicate email properly rejected (409), (4) Invalid email format rejected (422), (5) Wrong password rejected (401), (6) Non-existent email rejected (401), (7) REGRESSION verified: owner and elena accounts still work via society_code+username login, (8) Email login tokens validated on protected routes. No bugs found. Backend ready for frontend integration."
+    - agent: "main"
+      message: "NEW FEATURE ADDED: Cinematic landing page intro animation. On first visit, a ~4.3s canvas-based animation plays showing a darkened city coming into focus with glowing community signal points, connection lines, central CityPulse pulse, and wordmark, then the hero content reveals with staggered fades. Persisted via localStorage 'citypulse-intro-v1' so returning visits skip the full intro. Non-blocking (any interaction gracefully finishes it). Please test: (1) First visit intro plays and hero reveals correctly, (2) Final frame matches original hero with all elements, (3) Interaction (click/scroll) gracefully skips intro, (4) Returning visit skips full intro, (5) REGRESSION: all navigation links and sections still work, (6) No console errors."
+    - agent: "testing"
+      message: "Comprehensive landing page intro animation testing completed. ALL 7 TEST SCENARIOS PASSED. (1) First visit intro: Overlay present, hero hidden during intro, overlay removed after ~5s, hero reveals with correct classes and content, localStorage flag set. (2) Final frame matches original: All elements verified (eyebrow, title, CTA, scroll text, index). (3) Non-blocking interaction: Both click and scroll gracefully skip intro, page responsive. (4) Returning visit: Hero visible in ~1.1s, no long intro replay. (5) Regression: All navigation links work (Enter/Create Society, hero CTA, anchor links, FAQ accordion, society cards). (6) Canvas elements: All animation components present (city background, canvas 1880x555, veil, wordmark). (7) Console: No JavaScript errors or React warnings. Feature is production-ready with zero regressions. NO BUGS FOUND."

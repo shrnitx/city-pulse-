@@ -1,0 +1,49 @@
+/* CityPulse cinematic landing intro - isolated styles.
+   Fallback: if neither .cp-hide nor .cp-reveal is present, the hero renders normally. */
+
+.cp-intro{position:absolute;inset:0;z-index:6;overflow:hidden;pointer-events:none;opacity:1;transition:opacity .7s ease}
+.cp-intro.fade-out{opacity:0}
+.cp-intro-city{position:absolute;inset:0;background-size:cover;background-position:center 55%;transform:scale(1.045);filter:blur(18px) brightness(.32) saturate(.85);transition:transform 2.2s cubic-bezier(.22,.61,.36,1),filter 2.2s cubic-bezier(.22,.61,.36,1);will-change:transform,filter}
+.cp-intro-city.focus{transform:scale(1);filter:blur(0) brightness(.72) saturate(1)}
+.cp-intro-veil{position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,32,31,.89) 0%,rgba(12,37,35,.75) 30%,rgba(9,33,31,.22) 76%)}
+.cp-intro-canvas{position:absolute;inset:0;width:100%;height:100%}
+.cp-intro-mark{position:absolute;left:0;right:0;top:50%;display:flex;justify-content:center;transform:translateY(-50%);opacity:0}
+.cp-intro-mark span{font-family:'Plus Jakarta Sans',sans-serif;font-weight:750;font-size:34px;letter-spacing:.06em;color:#eef6f0;opacity:0;transform:translateY(10px);text-shadow:0 2px 34px rgba(8,28,26,.65)}
+.cp-intro.mark-in .cp-intro-mark{opacity:1}
+.cp-intro.mark-in .cp-intro-mark span{animation:cpMarkIn .7s cubic-bezier(.22,.61,.36,1) forwards}
+.cp-intro.mark-out .cp-intro-mark span{animation:cpMarkOut .6s ease forwards}
+@keyframes cpMarkIn{to{opacity:1;transform:none}}
+@keyframes cpMarkOut{to{opacity:0;transform:translateY(-6px)}}
+
+/* Hero content reveal orchestration */
+.landing-hero h1 .hero-line{display:inline-block}
+.landing-hero.cp-hide .hero-copy,.landing-hero.cp-hide .hero-footer,.landing-hero.cp-hide .hero-index{opacity:0}
+.landing-hero.cp-reveal .hero-eyebrow{opacity:0;animation:cpUpSm .6s cubic-bezier(.22,.61,.36,1) 0s forwards}
+.landing-hero.cp-reveal h1 .hero-line{opacity:0;animation:cpUp .75s cubic-bezier(.22,.61,.36,1) forwards}
+.landing-hero.cp-reveal h1 .hero-line-1{animation-delay:.12s}
+.landing-hero.cp-reveal h1 .hero-line-2{animation-delay:.26s}
+.landing-hero.cp-reveal .hero-copy p{opacity:0;animation:cpUp .6s cubic-bezier(.22,.61,.36,1) .5s forwards}
+.landing-hero.cp-reveal .hero-cta{opacity:0;animation:cpCta .55s cubic-bezier(.22,.61,.36,1) .72s forwards}
+.landing-hero.cp-reveal .hero-footer{opacity:0;animation:cpFade .6s ease .95s forwards}
+.landing-hero.cp-reveal .hero-index{opacity:0;animation:cpIndex .6s ease .95s forwards}
+@keyframes cpUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes cpUpSm{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes cpFade{to{opacity:1}}
+@keyframes cpIndex{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
+@keyframes cpCta{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+
+/* Subtle, elegant scroll hint + refined CTA hover (does not redesign the button) */
+.landing-hero .hero-footer a>svg{animation:cpBob 3.2s ease-in-out infinite}
+@keyframes cpBob{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+.hero-cta{transition:background-color .2s ease,transform .2s ease,color .18s}
+.hero-cta:hover{background:#eaf3dc;transform:translateY(-1px)}
+.hero-cta svg{transition:transform .2s ease}
+.hero-cta:hover svg{transform:translateX(4px)}
+
+/* Accessibility: honour reduced-motion by skipping motion and showing the final hero */
+@media(prefers-reduced-motion:reduce){
+  .cp-intro{display:none!important}
+  .landing-hero.cp-hide .hero-copy,.landing-hero.cp-hide .hero-footer,.landing-hero.cp-hide .hero-index{opacity:1}
+  .landing-hero.cp-reveal .hero-eyebrow,.landing-hero.cp-reveal h1 .hero-line,.landing-hero.cp-reveal .hero-copy p,.landing-hero.cp-reveal .hero-cta,.landing-hero.cp-reveal .hero-footer,.landing-hero.cp-reveal .hero-index{opacity:1;animation:none}
+  .landing-hero .hero-footer a>svg{animation:none}
+}
