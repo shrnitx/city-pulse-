@@ -1,0 +1,16 @@
+import { Activity, ArrowRight, Check, CheckCheck, CircleAlert, Loader2, MapPin, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dialog';
+export const Brand=({light=false,id='citypulse-brand'})=><Link data-testid={id} to="/" className={`brand ${light?'brand-light':''}`}><span className="brand-mark"><Activity size={25}/></span><span>CityPulse<span className="brand-dot">.</span></span></Link>;
+export const Btn=({children,id,variant='default',busy,...props})=><Button data-testid={id} variant={variant} {...props} disabled={busy||props.disabled}>{busy?<Loader2 size={16} className="spin"/>:null}{children}</Button>;
+export const Status=({value,id})=><span data-testid={id||`status-${value.toLowerCase().replaceAll(' ','-')}`} className={`status status-${value.toLowerCase().replaceAll(' ','-')}`}><span className="status-dot"/>{value}</span>;
+export const Verified=({id})=><span className="verified-badge" data-testid={id}><ShieldCheck size={13}/> ADMIN VERIFIED</span>;
+export const Loading=()=> <div className="empty-state" data-testid="loading-state"><Loader2 className="spin" size={25}/><p>Loading your community…</p></div>;
+export const ErrorState=({retry})=><div className="empty-state" data-testid="error-state"><CircleAlert/><h3>We couldn’t load this information.</h3><Btn id="retry-button" variant="outline" onClick={retry}>Try again</Btn></div>;
+export const Empty=({title='Nothing here yet',text='New community updates will appear here.',action})=><div className="empty-state" data-testid="empty-state"><span className="empty-icon"><CheckCheck size={28}/></span><h3 data-testid="empty-title">{title}</h3><p data-testid="empty-description">{text}</p>{action}</div>;
+export const PageHeading=({eyebrow,title,description,action})=><div className="page-heading"><div>{eyebrow&&<div className="eyebrow" data-testid="page-eyebrow">{eyebrow}</div>}<h1 data-testid="page-title">{title}</h1>{description&&<p data-testid="page-description">{description}</p>}</div>{action}</div>;
+export const Field=({label,id,children,hint,required})=><div className="field"><label htmlFor={id}>{label}{required&&<span className="required"> *</span>}</label>{children}{hint&&<small data-testid={`${id}-hint`}>{hint}</small>}</div>;
+export const Modal=({open,onClose,title,description,children,id='action-modal'})=><Dialog open={open} onOpenChange={v=>!v&&onClose()}><DialogContent data-testid={id} className="cp-dialog"><DialogTitle data-testid={`${id}-title`}>{title}</DialogTitle><DialogDescription data-testid={`${id}-description`}>{description}</DialogDescription>{children}</DialogContent></Dialog>;
+export const Location=({children})=><span className="location"><MapPin size={13}/>{children}</span>;
+export const SectionLink=({to,children,id})=><Link data-testid={id} className="text-link" to={to}>{children}<ArrowRight size={14}/></Link>;
