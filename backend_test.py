@@ -175,6 +175,172 @@ def test_register_new_resident():
         log_fail("Register new resident", str(e))
     return None
 
+def test_register_with_email():
+    """Test NEW: Register with email (globally unique)"""
+    import random
+    import time
+    # Generate unique email with timestamp to avoid conflicts
+    unique_email = f"newuser{random.randint(10000, 99999)}_{int(time.time())}@example.com"
+    username = f"emailuser_{random.randint(1000, 9999)}"
+    
+    try:
+        response = requests.post(
+            f"{BASE_URL}/auth/register",
+            json={
+                "society_code": SOCIETY_CODE,
+                "username": username,
+                "password": "SecurePass123!",
+                "name": "Email Test User",
+                "email": unique_email,
+                "area": "Block C"
+            },
+            timeout=10
+        )
+        if response.status_code == 201:
+            data = response.json()
+            if "token" in data and "user" in data and "society" in data:
+                if data["user"].get("email") == unique_email.lower():
+                    log_pass("Register with unique email returns 201")
+                    return {"email": unique_email, "password": "SecurePass123!", "token": data["token"]}
+                else:
+                    log_fail("Register with email", f"Email not set correctly: {data['user'].get('email')}")
+            else:
+                log_fail("Register with email", f"Missing fields: {data}")
+        else:
+            log_fail("Register with email", f"Status code {response.status_code}: {response.text}")
+    except Exception as e:
+        log_fail("Register with email", str(e))
+    return None
+
+def test_register_duplicate_email(email):
+    """Test NEW: Register with duplicate email returns 409"""
+    import random
+    username = f"duplicate_{random.randint(1000, 9999)}"
+    
+    try:
+        response = requests.post(
+            f"{BASE_URL}/auth/register",
+            json={
+                "society_code": SOCIETY_CODE,
+                "username": username,
+                "password": "AnotherPass123!",
+                "name": "Duplicate Email User",
+                "email": email,
+                "area": "Block D"
+            },
+            timeout=10
+        )
+        if response.status_code == 409:
+            log_pass("Duplicate email registration rejected with 409")
+        else:
+            log_fail("Duplicate email registration", f"Expected 409, got {response.status_code}: {response.text}")
+    except Exception as e:
+        log_fail("Duplicate email registration", str(e))
+
+def test_register_invalid_email():
+    """Test NEW: Register with invalid email format returns 422"""
+    import random
+    username = f"invalidemail_{random.randint(1000, 9999)}"
+    
+    try:
+        response = requests.post(
+            f"{BASE_URL}/auth/register",
+            json={
+                "society_code": SOCIETY_CODE,
+                "username": username,
+                "password": "ValidPass123!",
+                "name": "Invalid Email User",
+                "email": "notanemail",
+                "area": "Block E"
+            },
+            timeout=10
+        )
+        if response.status_code == 422:
+            log_pass("Invalid email format rejected with 422")
+        else:
+            log_fail("Invalid email format", f"Expected 422, got {response.status_code}: {response.text}")
+    except Exception as e:
+        log_fail("Invalid email format", str(e))
+
+def test_login_with_email(email, password):
+    """Test NEW: Login with email and password (no society code)"""
+    try:
+        response = requests.post(
+            f"{BASE_URL}/auth/login-email",
+            json={
+                "email": email,
+                "password": password
+            },
+            timeout=10
+        )
+        if response.status_code == 200:
+            data = response.json()
+            if "token" in data and "user" in data and "society" in data:
+                log_pass("Login with email returns 200 with token")
+                return data["token"]
+            else:
+                log_fail("Login with email", f"Missing fields: {data}")
+        else:
+            log_fail("Login with email", f"Status code {response.status_code}: {response.text}")
+    except Exception as e:
+        log_fail("Login with email", str(e))
+    return None
+
+def test_login_email_wrong_password(email):
+    """Test NEW: Login with wrong password returns 401"""
+    try:
+        response = requests.post(
+            f"{BASE_URL}/auth/login-email",
+            json={
+                "email": email,
+                "password": "WrongPassword123!"
+            },
+            timeout=10
+        )
+        if response.status_code == 401:
+            log_pass("Login with wrong password rejected with 401")
+        else:
+            log_fail("Login with wrong password", f"Expected 401, got {response.status_code}: {response.text}")
+    except Exception as e:
+        log_fail("Login with wrong password", str(e))
+
+def test_login_email_nonexistent(email="nonexistent@example.com"):
+    """Test NEW: Login with non-existent email returns 401"""
+    try:
+        response = requests.post(
+            f"{BASE_URL}/auth/login-email",
+            json={
+                "email": email,
+                "password": "SomePassword123!"
+            },
+            timeout=10
+        )
+        if response.status_code == 401:
+            log_pass("Login with non-existent email rejected with 401")
+        else:
+            log_fail("Login with non-existent email", f"Expected 401, got {response.status_code}: {response.text}")
+    except Exception as e:
+        log_fail("Login with non-existent email", str(e))
+
+def test_email_token_validation(token):
+    """Test NEW: Token from email login works on protected route"""
+    try:
+        response = requests.get(
+            f"{BASE_URL}/auth/me",
+            headers={"Authorization": f"Bearer {token}"},
+            timeout=10
+        )
+        if response.status_code == 200:
+            data = response.json()
+            if "user" in data and "society" in data:
+                log_pass("Email login token validated on /auth/me")
+            else:
+                log_fail("Email token validation", f"Missing fields: {data}")
+        else:
+            log_fail("Email token validation", f"Status code {response.status_code}: {response.text}")
+    except Exception as e:
+        log_fail("Email token validation", str(e))
+
 def test_logout(username):
     """Test 7: Logout invalidates token"""
     if username not in tokens:
@@ -765,8 +931,8 @@ def main():
     print("\n--- DEMO INFO ---")
     test_demo_info()
     
-    # Test 3-4: Authentication
-    print("\n--- AUTHENTICATION ---")
+    # Test 3-4: Authentication (REGRESSION TEST)
+    print("\n--- AUTHENTICATION (REGRESSION: Society Code Login) ---")
     owner_data = test_login("owner", "initial_admin")
     admin_data = test_login("blockb.admin", "admin")
     admin2_data = test_login("utilities.admin", "admin")
@@ -778,8 +944,35 @@ def main():
     test_session_validation("owner")
     test_session_validation("elena")
     
-    # Test 6: Register
-    print("\n--- REGISTRATION ---")
+    # NEW FEATURE TESTS: Email-based authentication
+    print("\n--- NEW FEATURE: EMAIL-BASED AUTHENTICATION ---")
+    print("Testing email registration and login...")
+    
+    # Test: Register with unique email
+    email_user = test_register_with_email()
+    
+    if email_user:
+        # Test: Duplicate email registration
+        test_register_duplicate_email(email_user["email"])
+        
+        # Test: Login with email
+        email_token = test_login_with_email(email_user["email"], email_user["password"])
+        
+        # Test: Token validation
+        if email_token:
+            test_email_token_validation(email_token)
+        
+        # Test: Wrong password
+        test_login_email_wrong_password(email_user["email"])
+    
+    # Test: Invalid email format
+    test_register_invalid_email()
+    
+    # Test: Non-existent email
+    test_login_email_nonexistent()
+    
+    # Test 6: Register (old test without email)
+    print("\n--- REGISTRATION (Legacy without email) ---")
     new_resident = test_register_new_resident()
     
     # Test 8: Civic data

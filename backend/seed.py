@@ -8,6 +8,7 @@ async def seed_demo():
     await db.societies.create_index('code',unique=True)
     await db.users.create_index([('society_id',1),('username',1)],unique=True)
     await db.users.create_index('id',unique=True)
+    await db.users.create_index('email',unique=True,partialFilterExpression={'email':{'$gt':''}})
     await db.sessions.create_index('token_hash',unique=True)
     await db.sessions.create_index('expires_at',expireAfterSeconds=0)
     await db.signals.create_index([('society_id',1),('case_id',1),('user_id',1)],unique=True)

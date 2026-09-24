@@ -50,8 +50,12 @@ class Login(BaseModel):
 class Register(Login):
     password: str = Field(min_length=8, max_length=128)
     name: str = Field(min_length=2, max_length=80)
+    email: str = Field(pattern=r'^[^@\s]+@[^@\s]+\.[^@\s]+$', max_length=120)
     area: str = Field(default='', max_length=120)
     model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
+class EmailLogin(BaseModel):
+    email: str = Field(min_length=3, max_length=120)
+    password: str = Field(min_length=1, max_length=128)
 
 @router.post('/auth/login')
 async def login(data: Login):
@@ -60,14 +64,22 @@ async def login(data: Login):
     if not user or not check_password(data.password, user.get('password_hash')): raise HTTPException(401, 'Society code, username, or password is incorrect')
     return await session_response(user)
 
+@router.post('/auth/login-email')
+async def login_email(data: EmailLogin):
+    user = await db.users.find_one({'email': data.email.strip().lower(), 'active': True}, {'_id': 0})
+    if not user or not check_password(data.password, user.get('password_hash')): raise HTTPException(401, 'Email or password is incorrect')
+    return await session_response(user)
+
 @router.post('/auth/register', status_code=201)
 async def register(data: Register):
     society = await db.societies.find_one({'code': data.society_code.strip().upper()}, {'_id': 0})
     if not society: raise HTTPException(404, 'Society code not found')
     if not society['settings']['registration_open']: raise HTTPException(403, 'Resident registration is currently closed')
-    user = {'id': uid(), 'society_id': society['id'], 'username': data.username.lower(), 'name': data.name, 'area': data.area, 'email': '', 'role': 'resident', 'categories': [], 'active': True, 'base_points': 0, 'created_at': now(), 'password_hash': hash_password(data.password)}
+    email = data.email.strip().lower()
+    if await db.users.find_one({'email': email}): raise HTTPException(409, 'An account with this email already exists')
+    user = {'id': uid(), 'society_id': society['id'], 'username': data.username.lower(), 'name': data.name, 'area': data.area, 'email': email, 'role': 'resident', 'categories': [], 'active': True, 'base_points': 0, 'created_at': now(), 'password_hash': hash_password(data.password)}
     try: await ScopedRepo(user).insert('users', user)
-    except DuplicateKeyError: raise HTTPException(409, 'This username is already taken in your society')
+    except DuplicateKeyError as e: raise HTTPException(409, 'An account with this email already exists' if 'email' in str(e) else 'This username is already taken in your society')
     return await session_response(user)
 
 @router.get('/auth/me')

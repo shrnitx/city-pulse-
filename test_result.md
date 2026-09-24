@@ -104,6 +104,20 @@
 user_problem_statement: "Continuation of CityPulse civic intelligence app. User reported it needs debugging - make sure every feature works and remove all bugs. Root issue found: backend/.env and frontend/.env were missing (lost in zip export), so services could not start. Recreated both .env files with correct values (MONGO_URL, DB_NAME, CORS_ORIGINS, EMERGENT_LLM_KEY, demo creds, REACT_APP_BACKEND_URL)."
 
 backend:
+  - task: "Email & password login (NEW) + email-based registration"
+    implemented: true
+    working: true
+    file: "auth_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "NEW FEATURE. Added POST /auth/login-email {email,password} for email login (no society code). Registration now REQUIRES a unique global email (partial unique index on non-empty email). Existing society_code+username login (/auth/login) preserved. Need to verify: register with email works, duplicate email rejected (409), login-email works with correct creds, wrong password rejected (401), invalid email format rejected (422), and existing society/username login + demo accounts still work."
+        - working: true
+          agent: "testing"
+          comment: "All 9 focused tests PASSED. (1) Register with email returns 201 with token+user+society, email stored correctly. (2) Login with email returns 200 with same response shape as society login. (3) Duplicate email registration rejected with 409. (4) Invalid email format rejected with 422. (5) Wrong password on login-email rejected with 401. (6) Non-existent email rejected with 401. (7) REGRESSION: owner and elena accounts still login successfully via society_code+username. (8) Token from email login validated successfully on /auth/me. Email authentication feature fully functional."
   - task: "Auth (login/register/session/logout) + demo credentials"
     implemented: true
     working: true
@@ -191,7 +205,7 @@ frontend:
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 1
+  test_sequence: 2
   run_ui: false
 
 test_plan:
@@ -205,3 +219,7 @@ agent_communication:
       message: "App was non-functional because both .env files were missing (gitignored, lost in zip export). Recreated them. Services now running, health OK, login works via curl. Please run comprehensive backend testing of all endpoints. Demo login: society_code=GV-48291, password=CityPulse2025!, usernames: owner (initial_admin), blockb.admin (admin), utilities.admin (admin), elena (resident). Test tenant isolation, role-based access, problem reporting flow, voting/confirm/follow, comments, admin case management, analytics, and media upload/download."
     - agent: "testing"
       message: "Comprehensive backend testing completed successfully. Executed 33 tests covering all backend endpoints. Results: 31 tests PASSED, 2 minor test logic issues (not backend bugs). All critical features verified working: (1) Authentication & authorization with all 4 demo roles, (2) Society management & civic data panels, (3) Problem reporting with AI clustering & analysis, (4) Voting/confirmation/following signals, (5) Comments with helpful marking, (6) Admin case management (verify/assign/status/updates), (7) Role-based permission enforcement, (8) Analytics with comprehensive metrics, (9) Media upload/download/delete via Emergent storage, (10) Community & overview endpoints. NO BUGS FOUND. All backend APIs are fully functional. The app is ready for use."
+    - agent: "main"
+      message: "NEW FEATURE ADDED: Email & password login as an additional option alongside the existing Society Code + username login. Please test the backend auth: (1) POST /api/auth/register now requires exactly fields society_code, name, email, username, password, area (extra='forbid') - email must be globally unique; (2) POST /api/auth/login-email {email,password} authenticates by email only (no society code) and returns same {token,user,society} shape; (3) duplicate email registration returns 409; (4) invalid email format returns 422; (5) wrong password on login-email returns 401; (6) REGRESSION CHECK: existing POST /api/auth/login (society_code+username+password) and all 4 demo accounts still work (society_code=GV-48291, password=CityPulse2025!, usernames owner/blockb.admin/utilities.admin/elena). Note: test user testuser1@example.com / testpass123 may already exist from manual curl testing."
+    - agent: "testing"
+      message: "Focused email authentication testing completed. All 9 tests PASSED with no failures. NEW email login feature fully functional: (1) Registration with email works (201), email stored correctly, (2) Login-email endpoint works (200) with same response shape as society login, (3) Duplicate email properly rejected (409), (4) Invalid email format rejected (422), (5) Wrong password rejected (401), (6) Non-existent email rejected (401), (7) REGRESSION verified: owner and elena accounts still work via society_code+username login, (8) Email login tokens validated on protected routes. No bugs found. Backend ready for frontend integration."
