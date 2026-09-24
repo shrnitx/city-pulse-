@@ -104,6 +104,17 @@
 user_problem_statement: "Continuation of CityPulse civic intelligence app. User reported it needs debugging - make sure every feature works and remove all bugs. Root issue found: backend/.env and frontend/.env were missing (lost in zip export), so services could not start. Recreated both .env files with correct values (MONGO_URL, DB_NAME, CORS_ORIGINS, EMERGENT_LLM_KEY, demo creds, REACT_APP_BACKEND_URL)."
 
 backend:
+  - task: "Public demo-feed endpoint (NEW) for landing Live Demo Peek"
+    implemented: true
+    working: "NA"
+    file: "public_routes.py, server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "NEW public (no-auth) read-only endpoint GET /api/public/demo-feed. Returns {society:{name,location}, cases:[{case_number,title,category,location,status,severity,verified,created_at,reports,confirmations}]} for the seeded demo society (society_id green-valley-demo), filtered to demo:True curated cases, sorted newest first, max 6. Powers the landing page 'Live Demo Peek' feed. Verify: 200 without auth, returns society object and a non-empty cases array (5 curated cases), each case has reports/confirmations counts, and NO test-created (non-demo) cases leak in. Must NOT require Authorization header."
   - task: "Email & password login (NEW) + email-based registration"
     implemented: true
     working: true
@@ -223,7 +234,8 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Public demo-feed endpoint (NEW) for landing Live Demo Peek"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"

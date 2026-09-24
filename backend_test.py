@@ -890,6 +890,92 @@ def test_create_society():
     except Exception as e:
         log_fail("Create new society", str(e))
 
+def test_public_demo_feed():
+    """Test 29: Public demo-feed endpoint (NO AUTH REQUIRED)"""
+    print("\n--- PUBLIC DEMO FEED ENDPOINT ---")
+    
+    # Test 1: Returns 200 WITHOUT any auth token
+    try:
+        response = requests.get(f"{BASE_URL}/public/demo-feed", timeout=10)
+        if response.status_code == 200:
+            log_pass("Public demo-feed returns 200 without auth")
+        else:
+            log_fail("Public demo-feed 200 status", f"Status code {response.status_code}: {response.text}")
+            return
+    except Exception as e:
+        log_fail("Public demo-feed 200 status", str(e))
+        return
+    
+    # Parse response
+    try:
+        data = response.json()
+    except Exception as e:
+        log_fail("Public demo-feed JSON parsing", str(e))
+        return
+    
+    # Test 2: Response has shape {society: {name, location}, cases: [...]}
+    if "society" in data and "cases" in data:
+        log_pass("Public demo-feed has correct response shape")
+    else:
+        log_fail("Public demo-feed response shape", f"Missing 'society' or 'cases' keys. Got: {list(data.keys())}")
+        return
+    
+    society = data.get("society", {})
+    cases = data.get("cases", [])
+    
+    # Test 3: society.name is "Green Valley Residency" and society.location is present
+    if society.get("name") == "Green Valley Residency":
+        log_pass("Public demo-feed society.name is 'Green Valley Residency'")
+    else:
+        log_fail("Public demo-feed society.name", f"Expected 'Green Valley Residency', got '{society.get('name')}'")
+    
+    if society.get("location"):
+        log_pass("Public demo-feed society.location is present")
+    else:
+        log_fail("Public demo-feed society.location", "Location is missing or empty")
+    
+    # Test 4: cases is a non-empty array (should be 5 curated demo cases)
+    if isinstance(cases, list) and len(cases) > 0:
+        log_pass(f"Public demo-feed cases is non-empty array (found {len(cases)} cases)")
+    else:
+        log_fail("Public demo-feed cases array", f"Expected non-empty array, got {type(cases)} with length {len(cases) if isinstance(cases, list) else 'N/A'}")
+        return
+    
+    # Test 5: Each case has required fields
+    required_fields = ["case_number", "title", "category", "location", "status", "severity", "verified", "created_at", "reports", "confirmations"]
+    all_cases_valid = True
+    for i, case in enumerate(cases):
+        missing_fields = [field for field in required_fields if field not in case]
+        if missing_fields:
+            log_fail(f"Public demo-feed case {i+1} fields", f"Missing fields: {missing_fields}")
+            all_cases_valid = False
+    
+    if all_cases_valid:
+        log_pass("Public demo-feed all cases have required fields")
+    
+    # Test 6: NO test-created cases leak in (no "Test Problem" titles)
+    test_problem_cases = [case for case in cases if "Test Problem" in case.get("title", "")]
+    if len(test_problem_cases) == 0:
+        log_pass("Public demo-feed NO test-created cases leak in")
+    else:
+        log_fail("Public demo-feed test case leakage", f"Found {len(test_problem_cases)} test cases with 'Test Problem' in title: {[c.get('title') for c in test_problem_cases]}")
+    
+    # Test 7: At least one case has reports > 0
+    cases_with_reports = [case for case in cases if case.get("reports", 0) > 0]
+    if len(cases_with_reports) > 0:
+        log_pass(f"Public demo-feed at least one case has reports > 0 (found {len(cases_with_reports)} cases with reports)")
+    else:
+        log_fail("Public demo-feed reports count", "No cases found with reports > 0")
+    
+    # Additional info logging
+    print(f"\n   📊 Demo Feed Summary:")
+    print(f"   - Society: {society.get('name')} ({society.get('location')})")
+    print(f"   - Total cases: {len(cases)}")
+    print(f"   - Cases with reports: {len(cases_with_reports)}")
+    if cases_with_reports:
+        print(f"   - Sample case with reports: '{cases_with_reports[0].get('title')}' ({cases_with_reports[0].get('reports')} reports)")
+    print(f"   - Case titles: {[c.get('title', 'N/A')[:50] + '...' if len(c.get('title', '')) > 50 else c.get('title', 'N/A') for c in cases]}")
+
 def print_summary():
     """Print test summary"""
     print("\n" + "="*80)
@@ -1037,6 +1123,10 @@ def main():
     # Test 28: Create society
     print("\n--- CREATE SOCIETY ---")
     test_create_society()
+    
+    # Test 29: Public demo-feed endpoint (NEW)
+    print("\n--- PUBLIC DEMO FEED (NEW) ---")
+    test_public_demo_feed()
     
     # Test 7: Logout (do this last to avoid invalidating tokens)
     print("\n--- LOGOUT ---")
