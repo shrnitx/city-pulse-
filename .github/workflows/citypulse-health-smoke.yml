@@ -1,0 +1,32 @@
+name: CityPulse preview health smoke
+on:
+  push:
+    branches:
+      - perf/load-readiness-2026-10-12
+    paths:
+      - 'loadtest/health-smoke.js'
+      - '.github/workflows/citypulse-health-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  readonly-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Install k6
+        uses: grafana/setup-k6-action@v1
+        with:
+          k6-version: '0.54.0'
+
+      - name: Probe preview health (10 virtual users, 30 seconds)
+        env:
+          BASE_URL: https://backend-git-perf-load-readiness-2026-10-12-nitin-fa90.vercel.app
+        run: k6 run loadtest/health-smoke.js
