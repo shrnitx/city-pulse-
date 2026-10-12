@@ -29,4 +29,5 @@ jobs:
       - name: Probe preview health (10 virtual users, 30 seconds)
         env:
           BASE_URL: https://backend-git-perf-load-readiness-2026-10-12-nitin-fa90.vercel.app
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: k6 run loadtest/health-smoke.js

@@ -15,7 +15,8 @@ This folder contains a k6 API load-test harness. It is deliberately gated so it 
 2. Seed that environment with a dedicated society, an active case for comment/signal tests, and one or more load-test users.
 3. Obtain bearer tokens for those staging users. Set `LOAD_TEST_TOKENS` to comma-separated tokens. The test rotates among them by virtual-user number.
 4. Confirm that staging is isolated from production data, credentials, email, push notifications, and billing.
-5. Use a sufficiently provisioned load generator. A single laptop is unlikely to generate 10,000 virtual users reliably.
+5. Add the Vercel project's **Protection Bypass for Automation** secret as a GitHub Actions secret named `VERCEL_AUTOMATION_BYPASS_SECRET`. Never commit this value or place it in a URL. The harness sends it as the `x-vercel-protection-bypass` header.
+6. Use a sufficiently provisioned load generator. A single laptop is unlikely to generate 10,000 virtual users reliably.
 
 ## Smoke test (10 virtual users, read-only)
 

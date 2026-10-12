@@ -4,6 +4,7 @@ import { Rate } from 'k6/metrics';
 
 // Safety gate: this harness only accepts an explicitly confirmed staging target.
 const baseUrl = (__ENV.STAGING_BASE_URL || '').replace(/\/+$/, '');
+const bypassSecret = (__ENV.VERCEL_AUTOMATION_BYPASS_SECRET || '').trim();
 const confirmed = __ENV.CONFIRM_STAGING_TARGET === 'true';
 const highLoadAllowed = __ENV.ALLOW_HIGH_LOAD === 'true';
 const enableWrites = __ENV.ENABLE_WRITES === 'true';
@@ -15,6 +16,7 @@ const caseId = (__ENV.LOAD_TEST_CASE_ID || '').trim();
 const errors = new Rate('citypulse_request_errors');
 
 if (!baseUrl) throw new Error('Set STAGING_BASE_URL to a dedicated staging deployment URL.');
+if (!bypassSecret) throw new Error('Set VERCEL_AUTOMATION_BYPASS_SECRET in the runner environment before calling a protected preview.');
 if (!confirmed) throw new Error('Set CONFIRM_STAGING_TARGET=true only after verifying this is staging, not production.');
 if (tokens.length === 0) throw new Error('Set LOAD_TEST_TOKENS to one or more dedicated staging-user bearer tokens.');
 if (!Number.isInteger(targetVus) || targetVus < 1 || targetVus > 10000) throw new Error('TARGET_VUS must be an integer from 1 to 10000.');
@@ -61,7 +63,7 @@ const jsonHeaders = {
 
 function request(path, token, label, params = {}) {
   const response = http.get(`${baseUrl}/api${path}`, {
-    headers: { ...jsonHeaders, Authorization: `Bearer ${token}` },
+    headers: { ...jsonHeaders, Authorization: `Bearer ${token}`, 'x-vercel-protection-bypass': bypassSecret },
     tags: { endpoint: label },
     timeout: '30s',
     ...params,

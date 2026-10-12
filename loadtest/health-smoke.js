@@ -4,7 +4,9 @@ import { Rate } from 'k6/metrics';
 
 // Read-only smoke/low-load probe. Do not add write requests to this test.
 const baseUrl = (__ENV.BASE_URL || '').replace(/\/+$/, '');
+const bypassSecret = (__ENV.VERCEL_AUTOMATION_BYPASS_SECRET || '').trim();
 if (!baseUrl) throw new Error('BASE_URL is required');
+if (!bypassSecret) throw new Error('Set the GitHub Actions secret VERCEL_AUTOMATION_BYPASS_SECRET before testing this protected preview. No HTTP requests were sent.');
 
 const requestErrors = new Rate('citypulse_health_errors');
 export const options = {
@@ -24,6 +26,7 @@ export default function () {
   });
   const good = check(response, {
     'health responds HTTP 200': r => r.status === 200,
+    'application health response is JSON': r => (r.headers['Content-Type'] || '').toLowerCase().includes('application/json'),
     'database ping reports healthy': r => {
       try { return r.json('status') === 'ok'; } catch (_) { return false; }
     },
