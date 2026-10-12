@@ -14,6 +14,21 @@ async def seed_demo():
     await db.reputation.create_index([('society_id',1),('admin_id',1),('voter_id',1)],unique=True)
     for col in ['cases','reports','comments','files','notifications','audit']:
         await db[col].create_index([('society_id',1),('id',1)],unique=True)
+
+    # Query-pattern indexes for feed reads, duplicate detection, case decoration,
+    # notifications, and user/admin lookups. Index creation is idempotent.
+    await db.cases.create_index([('society_id',1),('created_at',-1)], name='cases_society_created')
+    await db.cases.create_index([('society_id',1),('status',1),('created_at',-1)], name='cases_society_status_created')
+    await db.cases.create_index([('society_id',1),('category',1),('created_at',-1)], name='cases_society_category_created')
+    await db.reports.create_index([('society_id',1),('case_id',1),('created_at',-1)], name='reports_society_case_created')
+    await db.reports.create_index([('society_id',1),('reporter_id',1),('created_at',-1)], name='reports_society_reporter_created')
+    await db.comments.create_index([('society_id',1),('case_id',1),('created_at',-1)], name='comments_society_case_created')
+    await db.files.create_index([('society_id',1),('case_id',1),('is_deleted',1)], name='files_society_case_deleted')
+    await db.files.create_index([('society_id',1),('owner_id',1),('case_id',1),('is_deleted',1)], name='files_society_owner_case_deleted')
+    await db.signals.create_index([('society_id',1),('case_id',1),('following',1)], name='signals_society_case_following')
+    await db.users.create_index([('society_id',1),('role',1),('active',1)], name='users_society_role_active')
+    await db.notifications.create_index([('society_id',1),('user_id',1),('created_at',-1)], name='notifications_society_user_created')
+    await db.notifications.create_index([('society_id',1),('user_id',1),('read',1)], name='notifications_society_user_read')
     await db.counters.update_one({'id':'case_number'},{'$setOnInsert':{'value':1049}},upsert=True)
     if await db.societies.find_one({'code':'GV-48291'}):return
     sid='green-valley-demo';repo=ScopedRepo({'society_id':sid})

@@ -12,8 +12,8 @@ export default function Dashboard({mode='dashboard'}){
  const [search,setSearch]=useState(''),[debounced,setDebounced]=useState(''),[category,setCategory]=useState(''),[sort,setSort]=useState('priority');
  useEffect(()=>{const t=setTimeout(()=>setDebounced(search),250);return()=>clearTimeout(t);},[search]);
  const query=new URLSearchParams({scope:mode==='dashboard'?'':mode,search:debounced,status,category,sort});
- const {data,error,mutate}=useSWR(`/problems?${query}`,fetcher,{refreshInterval:5000});const {data:stats,mutate:refreshStats}=useSWR('/overview',fetcher,{refreshInterval:5000});
- const {data:all}=useSWR('/problems?status=active',fetcher,{refreshInterval:10000});
+ const {data,error,mutate}=useSWR(`/problems?${query}`,fetcher,{refreshInterval:30000});const {data:stats,mutate:refreshStats}=useSWR('/overview',fetcher,{refreshInterval:30000});
+ const {data:all}=useSWR('/problems?status=active',fetcher,{refreshInterval:60000});
  const refresh=async()=>{await Promise.all([mutate(),refreshStats()]);};
  const titles={dashboard:isAdmin?'Your community. In good hands.':'Your community, at a glance.',problems:'Community problems',requests:'Admin pull requests',mine:'Your reports. Real impact.',following:'Updates that matter to you.'};
  const descriptions={dashboard:isAdmin?'Review the signal. Verify the facts. Keep your community moving.':'A clearer picture of your neighborhood. A shared path forward.',problems:'Local problems, collective awareness, and visible progress.',requests:'Consolidated community signals, ready for a human decision.',mine:'Your user push requests and the progress they’re making.',following:'Meaningful progress on the problems you’re following.'};

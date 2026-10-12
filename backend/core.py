@@ -66,8 +66,25 @@ def event(text, kind='status', actor='CityPulse', **extra):
     return {'id': uid(), 'text': text, 'kind': kind, 'actor': actor, 'created_at': now(), **extra}
 
 async def notify(repo, recipients, title, case_id=None):
-    for user_id in set(recipients):
-        await repo.insert('notifications', {'id': uid(), 'user_id': user_id, 'title': title, 'case_id': case_id, 'read': False, 'created_at': now()})
+    # Batch notification fan-out into one MongoDB call instead of one round-trip
+    # per recipient. Keep tenant ownership explicit on every inserted document.
+    user_ids = set(recipients)
+    if not user_ids:
+        return
+    created_at = now()
+    documents = [
+        {
+            'id': uid(),
+            'society_id': repo.society_id,
+            'user_id': user_id,
+            'title': title,
+            'case_id': case_id,
+            'read': False,
+            'created_at': created_at,
+        }
+        for user_id in user_ids
+    ]
+    await db.notifications.insert_many(documents, ordered=False)
 
 async def notify_case(repo, case_id, title):
     reports = await repo.many('reports', {'case_id': case_id})
