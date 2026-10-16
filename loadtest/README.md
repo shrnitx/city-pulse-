@@ -1,67 +1,113 @@
-# CityPulse staged load testing
+# CityPulse 10,000-user API load test
 
-This folder contains a k6 API load-test harness. It is deliberately gated so it does not run against production accidentally.
+This test harness simulates 10,000 concurrent virtual residents using CityPulse, continuously reading the feed, submitting clustered reports, following cases and occasionally commenting. A synthetic administrator verifies incoming cases while resolving only a portion, so resolved, in-progress and unresolved work coexists throughout the run.
 
-## What it exercises
+It contains:
+- \`provision_users.py\`: safely creates one isolated test society and up to 10,000 synthetic residents through the API.
+- \`citypulse_10k.js\`: k6 workload, configurable ramp-up, ongoing resident traffic, report creation, case-following, comments, admin triage, metrics and pass/fail thresholds.
+- \`users.json\`: generated private credentials/configuration. It is ignored by git; never upload or commit it.
 
-- Authenticated problem feed and overview reads
-- Notifications and current-user reads
-- Optional synthetic complaint creation, comments, and community signals
-- Latency and HTTP error thresholds
+## Important: isolate the environment first
 
-## Before you run it
+1. Deploy this branch to a **Preview/staging backend**.
+2. Configure that Preview backend with a **dedicated disposable MongoDB database**. Set \`MONGO_URL\` to the test cluster URI and \`DB_NAME=citypulse_loadtest\` (or another database used only for this run). Confirm that the preview environment does not inherit the production database URI.
+3. Configure the remaining backend startup variables needed by the application, including \`CORS_ORIGINS\`, \`CITYPULSE_DEMO_PASSWORD\` and \`CITYPULSE_OWNER_EMAIL\`.
+4. Confirm \`GET /api/health\` returns HTTP 200 against the staging URL.
+5. Never paste database URIs, passwords or Vercel bypass secrets into chat, source files or logs. Keep them in local environment variables or Vercel settings.
 
-1. Deploy the performance branch to a **dedicated staging environment** with its own database and object storage.
-2. Seed that environment with a dedicated society, an active case for comment/signal tests, and one or more load-test users.
-3. Obtain bearer tokens for those staging users. Set `LOAD_TEST_TOKENS` to comma-separated tokens. The test rotates among them by virtual-user number.
-4. Confirm that staging is isolated from production data, credentials, email, push notifications, and billing.
-5. Add the Vercel project's **Protection Bypass for Automation** secret as a GitHub Actions secret named `VERCEL_AUTOMATION_BYPASS_SECRET`. Never commit this value or place it in a URL. The harness sends it as the `x-vercel-protection-bypass` header.
-6. Use a sufficiently provisioned load generator. A single laptop is unlikely to generate 10,000 virtual users reliably.
+**Do not run this against production.** Provisioning creates test users and the load test creates reports, comments, signals, notifications, audit events and sessions. The safest cleanup after testing is to delete and recreate the dedicated test database.
 
-## Smoke test (10 virtual users, read-only)
+If Vercel deployment protection is enabled on the Preview URL, set \`VERCEL_AUTOMATION_BYPASS_SECRET\` in the local shell to the Vercel-generated automation bypass secret. The harness sends it as a request header and never prints it. Do not put a bypass secret into the URL.
 
-Install k6, then run from the repository root:
+## 1. Install the tools
 
-```bash
-STAGING_BASE_URL=https://YOUR-STAGING-URL \
-CONFIRM_STAGING_TARGET=true \
-LOAD_TEST_TOKENS=TOKEN1,TOKEN2 \
-PROFILE=smoke \
-k6 run loadtest/citypulse.js
-```
+Install Python 3.10+ and [Grafana k6](https://grafana.com/docs/k6/latest/set-up/install-k6/). Verify:
 
-## Capacity test (up to 10,000 virtual users)
+\`\`\`bash
+python --version
+k6 version
+\`\`\`
 
-Only run this against isolated staging after an initial smoke test and a gradual 100/1,000/5,000-VU run has been reviewed:
+## 2. Provision the test users
 
-```bash
-STAGING_BASE_URL=https://YOUR-STAGING-URL \
-CONFIRM_STAGING_TARGET=true \
-LOAD_TEST_TOKENS=TOKEN1,TOKEN2,TOKEN3 \
-PROFILE=capacity \
-TARGET_VUS=10000 \
-ALLOW_HIGH_LOAD=true \
-k6 run loadtest/citypulse.js
-```
+From this directory, set \`BASE_URL\` to the unique staging backend deployment URL, without the \`/api\` suffix.
 
-This ramps to the target over several minutes, holds briefly, then ramps down. The 5-second think time makes it an interactive-user approximation, not a 10,000-requests-per-second benchmark. Use distributed load generators for the 10k profile and monitor the API, database, and generator throughout.
+macOS/Linux:
 
-## Mutating complaint test
+\`\`\`bash
+export BASE_URL="https://YOUR-STAGING-BACKEND-URL"
+export LOADTEST_USER_COUNT=10000
+export LOADTEST_PROVISION_WORKERS=8
+export CITYPULSE_LOADTEST_CONFIRM="YES_I_AM_USING_A_DEDICATED_TEST_DATABASE"
+python provision_users.py
+\`\`\`
 
-The mutating test creates synthetic complaint records and comments/signals against the configured active test case. It changes database contents and can consume resources; do not enable it until the environment is disposable and backed up.
+Windows PowerShell:
 
-Add:
+\`\`\`powershell
+$env:BASE_URL = "https://YOUR-STAGING-BACKEND-URL"
+$env:LOADTEST_USER_COUNT = "10000"
+$env:LOADTEST_PROVISION_WORKERS = "8"
+$env:CITYPULSE_LOADTEST_CONFIRM = "YES_I_AM_USING_A_DEDICATED_TEST_DATABASE"
+python .\provision_users.py
+\`\`\`
 
-```bash
-ENABLE_WRITES=true \
-CONFIRM_MUTATING_TESTS=true \
-LOAD_TEST_CASE_ID=ACTIVE_STAGING_CASE_ID
-```
+The script first calls the staging health endpoint. It then creates a test society and registers uniquely named residents at controlled concurrency, saving only one shared test password and the society/admin credentials in \`users.json\`. It will refuse provisioning without the explicit safety confirmation and refuses the known stable production aliases.
 
-A complaint is created by roughly 10% of iterations and comments/signals by another 20%. Use a separate staging database and clean it up after the run.
+If provisioning fails partway through, investigate the error and reset the dedicated test database before retrying. Do not run the provisioner repeatedly against a shared database.
 
-## Thresholds and interpretation
+## 3. Smoke test before increasing load
 
-The initial pass/fail gates are less than 1% HTTP failures and p95 latency below 1.5 seconds. These are starting SLOs, not guarantees. Track p50/p95/p99 latency, throughput, database query latency, CPU, memory, connection pool saturation, and write queue depth.
+Begin with 25 VUs and only then increase the test size. Every k6 run requires an explicit staging confirmation. More than 100 VUs requires an additional high-load confirmation.
 
-Do not claim a 10k-user capacity until a run completes without threshold violations and the system stays healthy while the load generator is not saturated.
+\`\`\`bash
+# First smoke test: 25 virtual users, 1 minute of steady traffic.
+export BASE_URL="https://YOUR-STAGING-BACKEND-URL"
+k6 run citypulse_10k.js \
+  -e CONFIRM_STAGING_TARGET=true \
+  -e TARGET_VUS=25 \
+  -e RAMP_DURATION=30s \
+  -e HOLD_DURATION=1m
+
+# Gradually grow the load. Inspect the prior results and database health before each step.
+k6 run citypulse_10k.js -e CONFIRM_STAGING_TARGET=true -e TARGET_VUS=100 -e RAMP_DURATION=1m -e HOLD_DURATION=3m
+k6 run citypulse_10k.js -e CONFIRM_STAGING_TARGET=true -e ALLOW_HIGH_LOAD=true -e TARGET_VUS=500 -e RAMP_DURATION=3m -e HOLD_DURATION=5m
+k6 run citypulse_10k.js -e CONFIRM_STAGING_TARGET=true -e ALLOW_HIGH_LOAD=true -e TARGET_VUS=1000 -e RAMP_DURATION=5m -e HOLD_DURATION=10m
+k6 run citypulse_10k.js -e CONFIRM_STAGING_TARGET=true -e ALLOW_HIGH_LOAD=true -e TARGET_VUS=2500 -e RAMP_DURATION=5m -e HOLD_DURATION=10m
+k6 run citypulse_10k.js -e CONFIRM_STAGING_TARGET=true -e ALLOW_HIGH_LOAD=true -e TARGET_VUS=5000 -e RAMP_DURATION=10m -e HOLD_DURATION=15m
+k6 run citypulse_10k.js -e CONFIRM_STAGING_TARGET=true -e ALLOW_HIGH_LOAD=true -e TARGET_VUS=10000 -e RAMP_DURATION=10m -e HOLD_DURATION=20m
+\`\`\`
+
+The final 10k run lasts approximately 31 minutes: 10 minutes to ramp up, 20 minutes at 10,000 VUs, then one minute to ramp down. The default report probability is 1% per resident iteration; with 10,000 VUs and the default think time, reports arrive continuously rather than all at once. The administrator verifies new cases and:
+- resolves about one-third of cases,
+- moves about one-third to In Progress,
+- leaves about one-third verified but unresolved.
+
+Workload controls:
+- \`REPORT_PROBABILITY=0.01\`: report probability per resident iteration.
+- \`MIN_THINK_SECONDS=10\` / \`MAX_THINK_SECONDS=20\`: think time between resident iterations.
+- \`TARGET_VUS\`: peak active virtual residents, up to 10,000.
+- \`RAMP_DURATION\` and \`HOLD_DURATION\`: ramp and sustained-load time.
+
+## 4. Pass/fail gates and output
+
+The script measures request latency/error rates and custom metrics for report submission, report clustering, comments, administrator verification, resolution and unresolved cases. It writes \`results-summary.json\` locally.
+
+Initial gates:
+- HTTP errors below 2%. The test aborts if this rate stays too high after the initial two-minute observation window.
+- p95 request latency below 2.5 seconds.
+- p99 request latency below 5 seconds.
+- At least 98% report submissions succeed.
+- At least 90% of administrator actions succeed.
+
+These are target SLOs, not claims about current performance. If the test fails, keep the failed result, locate the bottleneck, optimize and rerun. Do not simply loosen the thresholds.
+
+## 5. What to watch while the test runs
+
+Monitor Vercel function duration, invocations/concurrency, CPU/memory where available, 429/500/504 responses, and runtime logs. On MongoDB, watch CPU, memory, connections, operation counts, query latency, slow queries, index use and storage. Watch the load generator too: if it saturates, its limitations can distort the result.
+
+A passing test applies only to the exact frontend/backend commit, Vercel plan/region, MongoDB tier, index state and workload profile tested. For a credible 10k run, use distributed load generators or k6 Cloud if one machine cannot maintain 10,000 VUs without saturation.
+
+## What this test does not cover
+
+This is an API/backend test, not 10,000 browser instances. It does not benchmark browser animation/rendering. Evidence upload should be tested separately at low concurrency after a working object-storage key is configured. Civic weather/AQI feeds and the intelligence layer remain simulated in this MVP.
