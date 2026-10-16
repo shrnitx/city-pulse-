@@ -1,0 +1,35 @@
+name: Validate CityPulse load-test harness
+
+on:
+  push:
+    branches:
+      - "**"
+    paths:
+      - "loadtest/**"
+      - ".github/workflows/loadtest-harness-check.yml"
+  pull_request:
+    paths:
+      - "loadtest/**"
+      - ".github/workflows/loadtest-harness-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  syntax-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate Python provisioner syntax
+        run: python -m py_compile loadtest/provision_users.py
+      - name: Validate k6 JavaScript syntax
+        run: node --input-type=module --check < loadtest/citypulse_10k.js
