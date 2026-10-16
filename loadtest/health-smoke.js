@@ -21,6 +21,7 @@ export const options = {
 
 export default function () {
   const response = http.get(`${baseUrl}/api/health`, {
+    headers: { 'x-vercel-protection-bypass': bypassSecret },
     timeout: '15s',
     tags: { endpoint: 'health_readonly' },
   });
