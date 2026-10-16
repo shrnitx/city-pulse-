@@ -35,9 +35,9 @@ async def seed_demo():
     sid='green-valley-demo';repo=ScopedRepo({'society_id':sid})
     society={'id':sid,'society_id':sid,'name':'Green Valley Residency','code':'GV-48291','location':'Sector 14, Gurugram','address':'Green Valley Residency, Sector 14, Gurugram, Haryana 122001','population':10000,'latitude':28.4695,'longitude':77.0310,'settings':DEFAULT_SETTINGS,'created_at':now(),'demo':True}
     await repo.insert('societies',society)
-    pw=hash_password(os.environ['CITYPULSE_DEMO_PASSWORD'])
+    pw=hash_password(os.environ['DRCIVIC_DEMO_PASSWORD'])
     for user_id,username,name,role,area,categories,points in [('demo-resident','elena','Elena Vance','resident','Block B · Apartment 402',[],420),('demo-admin','blockb.admin','Arjun Mehta','admin','Block B',['Road','Traffic','Public Safety'],80),('demo-owner','owner','Society Owner','initial_admin','All blocks',[],120),('demo-admin-water','utilities.admin','Priya Sharma','admin','Sector 4',['Water','Electricity','Maintenance'],95)]:
-        await repo.insert('users',{'id':user_id,'username':username,'name':name,'role':role,'area':area,'categories':categories,'email':os.environ['CITYPULSE_OWNER_EMAIL'] if role=='initial_admin' else '', 'active':True,'demo':True,'base_points':points,'password_hash':pw,'created_at':now()})
+        await repo.insert('users',{'id':user_id,'username':username,'name':name,'role':role,'area':area,'categories':categories,'email':os.environ['DRCIVIC_OWNER_EMAIL'] if role=='initial_admin' else '', 'active':True,'demo':True,'base_points':points,'password_hash':pw,'created_at':now()})
     for i in range(65):
         await repo.insert('users',{'id':f'demo-signal-user-{i}','username':f'resident.{2800+i}','name':f'Resident #{2800+i}','role':'resident','area':['Block A','Block B','Block C'][i%3],'categories':[],'email':'','active':True,'demo':True,'base_points':0,'created_at':now(),'password_hash':'disabled'})
     specifications=[
@@ -48,7 +48,7 @@ async def seed_demo():
       (1045,'Damaged paving beside the community park','A loose paving slab near the park entrance creates a trip hazard. Residents have marked the spot and requested maintenance, especially for elderly residents who use the path.','Maintenance','Block A · Community Park','AI Analyzed','Standard',4,6,0,False,92),
     ]
     for num,title,description,category,location,status,severity,count,confirmed,evidence,verified,minutes in specifications:
-        case_id=f'case-{num}';created=(datetime.now(timezone.utc)-timedelta(minutes=minutes)).isoformat();timeline=[{**event('Report submitted','community','Resident #2841'),'created_at':created},{**event(f'{count} related reports consolidated into one admin pull request','ai','CityPulse · simulated analysis'),'created_at':(datetime.fromisoformat(created)+timedelta(minutes=3)).isoformat()}]
+        case_id=f'case-{num}';created=(datetime.now(timezone.utc)-timedelta(minutes=minutes)).isoformat();timeline=[{**event('Report submitted','community','Resident #2841'),'created_at':created},{**event(f'{count} related reports consolidated into one admin pull request','ai','DRCivic · simulated analysis'),'created_at':(datetime.fromisoformat(created)+timedelta(minutes=3)).isoformat()}]
         if verified:timeline.append({**event('Issue verified by administrator','verified','Priya Sharma'),'created_at':(datetime.fromisoformat(created)+timedelta(minutes=18)).isoformat()})
         official=[]
         if status=='In Progress':official=[{**event('Circuit breaker replacement is in progress. The electrical maintenance team is attending to Junction Box CJ-12.','official','Priya Sharma'),'created_at':(datetime.fromisoformat(created)+timedelta(minutes=30)).isoformat()}];timeline+=official

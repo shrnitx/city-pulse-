@@ -39,7 +39,7 @@ async def upload(file: UploadFile=File(...),user=Depends(require('report'))):
     if len(data)>10*1024*1024:raise HTTPException(413,'Evidence files must be 10 MB or smaller')
     mime,ext=detect_type(data)
     file_id=uid()
-    path=f"{os.environ['CITYPULSE_STORAGE_PREFIX']}/uploads/{user['society_id']}/{user['id']}/{file_id}.{ext}"
+    path=f"{os.environ['DRCIVIC_STORAGE_PREFIX']}/uploads/{user['society_id']}/{user['id']}/{file_id}.{ext}"
     try:result=await asyncio.to_thread(put_object,path,data,mime)
     except requests.RequestException:raise HTTPException(503,'Evidence storage is temporarily unavailable. Please try again.')
     await ScopedRepo(user).insert('files',{'id':file_id,'owner_id':user['id'],'case_id':None,'storage_path':result['path'],'original_filename':Path(file.filename or f'evidence.{ext}').name[:150],'content_type':mime,'size':len(data),'is_deleted':False,'created_at':now()})

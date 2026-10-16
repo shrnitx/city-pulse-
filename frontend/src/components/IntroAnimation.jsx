@@ -160,6 +160,6 @@ export default function IntroAnimation({ onReveal, onComplete }) {
     <div className="cp-intro-city" ref={cityRef} style={{ backgroundImage: "url('/assets/city-neighborhood.jpg')" }} />
     <div className="cp-intro-veil" />
     <canvas className="cp-intro-canvas" ref={canvasRef} />
-    <div className="cp-intro-mark"><span>CityPulse.</span></div>
+    <div className="cp-intro-mark"><span>DRCivic.</span></div>
   </div>;
 }

@@ -1,4 +1,4 @@
-# CityPulse deployment notes
+# DRCivic deployment notes
 
 ## Vercel frontend
 - Root directory: `frontend`
@@ -16,9 +16,9 @@ Required for startup:
 - `CORS_ORIGINS`: comma-separated, exact frontend origins
 
 Required by specific features:
-- `CITYPULSE_DEMO_PASSWORD`
-- `CITYPULSE_OWNER_EMAIL` (optional seed contact)
-- `CITYPULSE_STORAGE_PREFIX`
+- `DRCIVIC_DEMO_PASSWORD`
+- `DRCIVIC_OWNER_EMAIL` (optional seed contact)
+- `DRCIVIC_STORAGE_PREFIX`
 - `EMERGENT_LLM_KEY` for evidence storage integration
 - `INTEGRATION_PROXY_URL` is optional
 

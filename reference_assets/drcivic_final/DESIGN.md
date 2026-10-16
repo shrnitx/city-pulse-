@@ -1,5 +1,5 @@
 ---
-name: CityPulse Civic Intelligence
+name: DRCivic Civic Intelligence
 colors:
   surface: '#f8f9ff'
   surface-dim: '#cbdbf5'

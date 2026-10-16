@@ -1,8 +1,8 @@
-CityPulse — Civic Intelligence & Community Problem Management
+DRCivic — Civic Intelligence & Community Problem Management
 
 Hackathon / Mentor Documentation
 
-CityPulse is a multi-society community platform where residents can report local problems, attach evidence, confirm/engage with reports, discuss them, and follow their progress. Administrators receive organized cases, can verify/assign/update/resolve them, and can view analytics. A deterministic simulated intelligence layer groups related reports and generates structured insights.
+DRCivic is a multi-society community platform where residents can report local problems, attach evidence, confirm/engage with reports, discuss them, and follow their progress. Administrators receive organized cases, can verify/assign/update/resolve them, and can view analytics. A deterministic simulated intelligence layer groups related reports and generates structured insights.
 
 1. What is actually present in this ZIP?
 
@@ -873,7 +873,7 @@ aryan-123-main/
 
 22. Mentor-Friendly 30-Second Explanation
 
-CityPulse is a multi-society civic issue management platform. Residents can report community problems with location, descriptions and evidence. Instead of sending every duplicate report separately to administrators, the system groups related reports into a common case and generates structured intelligence such as affected users, evidence, contradictions and suggested administrators. Residents can confirm, discuss and follow cases, while administrators verify, assign, update, escalate and resolve them. The current MVP uses deterministic simulated intelligence and simulated civic feeds, with the architecture designed so these components can later be replaced by real AI models and external civic APIs.
+DRCivic is a multi-society civic issue management platform. Residents can report community problems with location, descriptions and evidence. Instead of sending every duplicate report separately to administrators, the system groups related reports into a common case and generates structured intelligence such as affected users, evidence, contradictions and suggested administrators. Residents can confirm, discuss and follow cases, while administrators verify, assign, update, escalate and resolve them. The current MVP uses deterministic simulated intelligence and simulated civic feeds, with the architecture designed so these components can later be replaced by real AI models and external civic APIs.
 
 23. What is MVP vs Future Scope?
 
@@ -978,7 +978,7 @@ Production-grade object storage configuration
 
 For a hackathon presentation, the technically accurate positioning is:
 
-                 CITYPULSE MVP
+                 DRCIVIC MVP
                        │
        ┌───────────────┼────────────────┐
        │               │                │

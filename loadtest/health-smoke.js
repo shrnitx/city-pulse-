@@ -8,14 +8,14 @@ const bypassSecret = (__ENV.VERCEL_AUTOMATION_BYPASS_SECRET || '').trim();
 if (!baseUrl) throw new Error('BASE_URL is required');
 if (!bypassSecret) throw new Error('Set the GitHub Actions secret VERCEL_AUTOMATION_BYPASS_SECRET before testing this protected preview. No HTTP requests were sent.');
 
-const requestErrors = new Rate('citypulse_health_errors');
+const requestErrors = new Rate('drcivic_health_errors');
 export const options = {
   vus: 10,
   duration: '30s',
   thresholds: {
     http_req_failed: ['rate<0.01'],
     http_req_duration: ['p(95)<1500'],
-    citypulse_health_errors: ['rate<0.01'],
+    drcivic_health_errors: ['rate<0.01'],
   },
 };
 

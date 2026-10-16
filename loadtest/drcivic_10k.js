@@ -17,16 +17,16 @@ const REPORT_PROBABILITY = Math.max(0, Math.min(1, Number(__ENV.REPORT_PROBABILI
 const MIN_THINK_SECONDS = Math.max(1, Number(__ENV.MIN_THINK_SECONDS || 10));
 const MAX_THINK_SECONDS = Math.max(MIN_THINK_SECONDS, Number(__ENV.MAX_THINK_SECONDS || 20));
 
-const reportsAttempted = new Counter('citypulse_reports_attempted');
-const reportsSucceeded = new Rate('citypulse_report_success');
-const reportsClustered = new Counter('citypulse_reports_clustered');
-const commentsAttempted = new Counter('citypulse_comments_attempted');
-const commentsSucceeded = new Rate('citypulse_comment_success');
-const casesVerified = new Counter('citypulse_cases_verified');
-const casesResolved = new Counter('citypulse_cases_resolved');
-const casesLeftOpen = new Counter('citypulse_cases_left_open');
-const adminActionsSucceeded = new Rate('citypulse_admin_action_success');
-const authFailures = new Counter('citypulse_auth_failures');
+const reportsAttempted = new Counter('drcivic_reports_attempted');
+const reportsSucceeded = new Rate('drcivic_report_success');
+const reportsClustered = new Counter('drcivic_reports_clustered');
+const commentsAttempted = new Counter('drcivic_comments_attempted');
+const commentsSucceeded = new Rate('drcivic_comment_success');
+const casesVerified = new Counter('drcivic_cases_verified');
+const casesResolved = new Counter('drcivic_cases_resolved');
+const casesLeftOpen = new Counter('drcivic_cases_left_open');
+const adminActionsSucceeded = new Rate('drcivic_admin_action_success');
+const authFailures = new Counter('drcivic_auth_failures');
 
 const templates = [
   { title: 'Water pressure low in Zone 1', category: 'Water', location: 'Load Zone 1 · Utility Junction', description: 'Residents are reporting low water pressure around the utility junction. The water supply appears intermittent and needs a maintenance inspection.' },
@@ -75,8 +75,8 @@ export const options = {
       { threshold: 'rate<0.02', abortOnFail: true, delayAbortEval: '2m' },
     ],
     http_req_duration: ['p(95)<2500', 'p(99)<5000'],
-    citypulse_report_success: ['rate>0.98'],
-    citypulse_admin_action_success: ['rate>0.90'],
+    drcivic_report_success: ['rate>0.98'],
+    drcivic_admin_action_success: ['rate>0.90'],
   },
 };
 

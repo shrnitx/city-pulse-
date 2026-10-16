@@ -20,7 +20,7 @@ import './readability.css';
 
 function Protected({ roles }) {
   const { user, loading } = useAuth();
-  if (loading) return <div className="boot-screen" data-testid="app-loading"><span className="pulse-logo">C</span><p>Connecting to your community…</p></div>;
+  if (loading) return <div className="boot-screen" data-testid="app-loading"><span className="pulse-logo">D</span><p>Connecting to your community…</p></div>;
   if (!user) return <Navigate to="/enter" replace />;
   if (roles && !roles.includes(user.role)) return <Navigate to="/app" replace />;
   return <Outlet />;

@@ -13,7 +13,7 @@ const targetVus = Number(__ENV.TARGET_VUS || 10);
 const profile = __ENV.PROFILE || 'smoke';
 const tokens = (__ENV.LOAD_TEST_TOKENS || '').split(',').map(x => x.trim()).filter(Boolean);
 const caseId = (__ENV.LOAD_TEST_CASE_ID || '').trim();
-const errors = new Rate('citypulse_request_errors');
+const errors = new Rate('drcivic_request_errors');
 
 if (!baseUrl) throw new Error('Set STAGING_BASE_URL to a dedicated staging deployment URL.');
 if (!bypassSecret) throw new Error('Set VERCEL_AUTOMATION_BYPASS_SECRET in the runner environment before calling a protected preview.');
@@ -42,7 +42,7 @@ const ramp = profile === 'capacity'
 
 export const options = {
   scenarios: {
-    citypulse_api: {
+    drcivic_api: {
       executor: 'ramping-vus',
       startVUs: 0,
       stages: ramp,
@@ -52,7 +52,7 @@ export const options = {
   thresholds: {
     http_req_failed: ['rate<0.01'],
     http_req_duration: ['p(95)<1500'],
-    citypulse_request_errors: ['rate<0.01'],
+    drcivic_request_errors: ['rate<0.01'],
   },
 };
 

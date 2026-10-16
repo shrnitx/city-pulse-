@@ -1,4 +1,4 @@
-"""CityPulse API regression tests: auth, tenancy, permissions, and core workflows."""
+"""DRCivic API regression tests: auth, tenancy, permissions, and core workflows."""
 
 import os
 import time
@@ -34,7 +34,7 @@ def _iso_past(minutes: int = 10) -> str:
 
 def _create_society(api_client, suffix: str):
     payload = {
-        "name": f"TEST CityPulse {suffix}",
+        "name": f"TEST DRCivic {suffix}",
         "location": f"TEST Sector {suffix}",
         "address": f"TEST Address {suffix}, City", "population": 1200,
         "latitude": 28.4595,
