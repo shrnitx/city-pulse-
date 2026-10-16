@@ -18,6 +18,7 @@ import urllib.request
 from pathlib import Path
 
 API_TIMEOUT = 45
+BYPASS_SECRET = os.environ.get('VERCEL_AUTOMATION_BYPASS_SECRET', '').strip()
 PROTECTED_HOSTS = {
     "backend-nitin-fa90.vercel.app",
     "backend-git-main-nitin-fa90.vercel.app",
@@ -34,6 +35,8 @@ def require_env(name: str) -> str:
 def request_json(base_url: str, method: str, path: str, payload=None):
     body = None if payload is None else json.dumps(payload).encode("utf-8")
     headers = {"Accept": "application/json"}
+    if BYPASS_SECRET:
+        headers["x-vercel-protection-bypass"] = BYPASS_SECRET
     if body is not None:
         headers["Content-Type"] = "application/json"
     request = urllib.request.Request(
