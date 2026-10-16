@@ -1,0 +1,6 @@
+# Generated load-test credentials and outputs contain secrets or environment data.
+users.json
+users.json.tmp
+results-summary.json
+*.csv
+*.log
