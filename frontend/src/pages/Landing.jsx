@@ -12,17 +12,12 @@ export default function Landing(){
     try {
       if (typeof window === 'undefined') return { play: false, reduced: false };
       const reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-      let seen = false;
-      try { seen = !!window.localStorage.getItem('citypulse-intro-v2'); } catch { seen = false; }
-      return { play: !reduced && !seen, reduced };
+      return { play: !reduced, reduced };
     } catch { return { play: false, reduced: false }; }
   });
   const [phase, setPhase] = useState(intro.play ? 'intro' : 'done');
   const reveal = useCallback(() => setPhase(current => current === 'intro' ? 'reveal' : current), []);
-  const complete = useCallback(() => {
-    setPhase('done');
-    try { window.localStorage.setItem('citypulse-intro-v2', '1'); } catch { /* privacy settings can disable storage */ }
-  }, []);
+  const complete = useCallback(() => setPhase('done'), []);
   useEffect(() => {
     if (!intro.play) return undefined;
     const timer = setTimeout(() => setPhase('done'), 6500);
