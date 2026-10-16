@@ -1,4 +1,4 @@
-name: Validate CityPulse load-test harness
+name: Validate DRCivic load-test harness
 
 on:
   push:
@@ -32,4 +32,4 @@ jobs:
       - name: Validate Python provisioner syntax
         run: python -m py_compile loadtest/provision_users.py
       - name: Validate k6 JavaScript syntax
-        run: node --input-type=module --check < loadtest/citypulse_10k.js
+        run: node --input-type=module --check < loadtest/drcivic_10k.js
