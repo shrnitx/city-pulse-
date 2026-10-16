@@ -71,7 +71,7 @@ async def register(data: Register):
     if not society: raise HTTPException(404, 'Society code not found')
     if not society['settings']['registration_open']: raise HTTPException(403, 'Resident registration is currently closed')
     email = data.email.strip().lower()
-    if await db.users.find_one({'email': email}): raise HTTPException(409, 'An account with this email already exists')
+    if email and await db.users.find_one({'email': email}): raise HTTPException(409, 'An account with this email already exists')
     user = {'id': uid(), 'society_id': society['id'], 'username': data.username.strip().lower(), 'name': data.name, 'area': data.area, 'email': email, 'role': 'resident', 'categories': [], 'active': True, 'base_points': 0, 'created_at': now(), 'password_hash': hash_password(data.password)}
     try: await ScopedRepo(user).insert('users', user)
     except DuplicateKeyError as error: raise HTTPException(409, 'An account with this email already exists' if 'email' in str(error) else 'This username is already taken in your society')
