@@ -8,11 +8,12 @@ from society_routes import router as society_router
 from problem_routes import router as problem_router
 from admin_routes import router as admin_router
 from media_routes import router as media_router
+from public_routes import router as public_router
 from seed import seed_demo
 
 app = FastAPI(title="CityPulse Civic Intelligence")
 app.add_middleware(CORSMiddleware, allow_origins=os.environ['CORS_ORIGINS'].split(','), allow_credentials=False, allow_methods=['*'], allow_headers=['*'])
-for router in [auth_router, society_router, problem_router, admin_router, media_router]:
+for router in [auth_router, society_router, problem_router, admin_router, media_router, public_router]:
     app.include_router(router, prefix='/api')
 
 @app.on_event('startup')
