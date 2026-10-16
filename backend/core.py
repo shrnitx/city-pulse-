@@ -53,7 +53,7 @@ PERMISSIONS = {
 }
 def authorize(principal, action, resource=None):
     allowed = action in PERMISSIONS.get(principal.get('role'), set())
-    logging.getLogger('citypulse.audit').info('principal=%s society=%s action=%s allowed=%s', principal['id'], principal['society_id'], action, allowed)
+    logging.getLogger('drcivic.audit').info('principal=%s society=%s action=%s allowed=%s', principal['id'], principal['society_id'], action, allowed)
     if resource and resource.get('society_id') != principal['society_id']: raise HTTPException(404, 'Not found')
     if not allowed: raise HTTPException(403, 'You do not have permission for this action')
 
@@ -62,7 +62,7 @@ async def get_case(repo, case_id):
     if not case: raise HTTPException(404, 'Problem not found')
     return case
 
-def event(text, kind='status', actor='CityPulse', **extra):
+def event(text, kind='status', actor='DRCivic', **extra):
     return {'id': uid(), 'text': text, 'kind': kind, 'actor': actor, 'created_at': now(), **extra}
 
 async def notify(repo, recipients, title, case_id=None):

@@ -78,12 +78,12 @@ async def report(data: Report,user=Depends(require('report'))):
     case_id=cluster['id'] if cluster else uid()
     if new_case:
         counter=await db.counters.find_one_and_update({'id':'case_number'},{'$inc':{'value':1}},upsert=True,return_document=True,projection={'_id':0})
-        case={'id':case_id,'case_number':counter['value'],'title':data.title,'description':data.description,'category':data.category,'location':data.location,'observed_at':observed.isoformat(),'duration':data.duration,'affected_area':data.affected_area,'reporter_id':user['id'],'reporter_name':user['name'],'created_at':now(),'status':'AI Analyzed','severity':'Standard','verified':False,'assigned_to':None,'assigned_name':None,'timeline':[event('Report submitted','community',user['name']),event('Report organized into an admin pull request','ai','CityPulse · simulated analysis')],'official_updates':[],'demo':False}
+        case={'id':case_id,'case_number':counter['value'],'title':data.title,'description':data.description,'category':data.category,'location':data.location,'observed_at':observed.isoformat(),'duration':data.duration,'affected_area':data.affected_area,'reporter_id':user['id'],'reporter_name':user['name'],'created_at':now(),'status':'AI Analyzed','severity':'Standard','verified':False,'assigned_to':None,'assigned_name':None,'timeline':[event('Report submitted','community',user['name']),event('Report organized into an admin pull request','ai','DRCivic · simulated analysis')],'official_updates':[],'demo':False}
         await repo.insert('cases',case)
     report_id=uid()
     await repo.insert('reports',{'id':report_id,'case_id':case_id,'reporter_id':user['id'],'reporter_name':user['name'],**data.model_dump(exclude={'observed_at'}),'observed_at':observed.isoformat(),'created_at':now()})
     for file_id in set(data.evidence_ids):await repo.update('files',{'id':file_id},{'$set':{'case_id':case_id}})
-    if not new_case:await repo.update('cases',{'id':case_id},{'$push':{'timeline':event('A related resident report was consolidated into this case','ai','CityPulse · simulated analysis')}})
+    if not new_case:await repo.update('cases',{'id':case_id},{'$push':{'timeline':event('A related resident report was consolidated into this case','ai','DRCivic · simulated analysis')}})
     await analyze(repo,case_id)
     await notify(repo,[user['id']],'Your problem has been submitted.' if new_case else 'Your report was received and grouped with a related case.',case_id)
     if new_case:

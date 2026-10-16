@@ -5,6 +5,7 @@ on:
       - perf/load-readiness-2026-10-12
       - deploy/fix-vercel-frontend-2026-10-16
       - rebrand/drcivic-final
+      - rebrand/drcivic
     paths:
       - 'loadtest/health-smoke.js'
       - '.github/workflows/drcivic-health-smoke.yml'
