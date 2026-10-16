@@ -1,0 +1,5 @@
+{
+  "installCommand": "yarn install --non-interactive",
+  "buildCommand": "DISABLE_ESLINT_PLUGIN=true CI=false yarn run build",
+  "outputDirectory": "build"
+}
