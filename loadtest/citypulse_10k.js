@@ -9,6 +9,7 @@ import { Counter, Rate } from 'k6/metrics';
 const testData = JSON.parse(open('./users.json'));
 const BASE_URL = (__ENV.BASE_URL || testData.base_url || '').replace(/\/+$/, '');
 const API = BASE_URL + '/api';
+const BYPASS_SECRET = (__ENV.VERCEL_AUTOMATION_BYPASS_SECRET || '').trim();
 const TARGET_VUS = Number(__ENV.TARGET_VUS || 100);
 const RAMP_DURATION = __ENV.RAMP_DURATION || '5m';
 const HOLD_DURATION = __ENV.HOLD_DURATION || '10m';
@@ -85,6 +86,7 @@ function authHeaders(token) {
       Authorization: 'Bearer ' + token,
       Accept: 'application/json',
       'Content-Type': 'application/json',
+      ...(BYPASS_SECRET ? { 'x-vercel-protection-bypass': BYPASS_SECRET } : {}),
     },
     timeout: '30s',
   };
@@ -107,7 +109,7 @@ function loginResident() {
       username,
       password: testData.resident_password,
     }),
-    { headers: { 'Content-Type': 'application/json' }, tags: { name: 'POST /auth/login', workload: 'resident' }, timeout: '30s' },
+    { headers: { 'Content-Type': 'application/json', ...(BYPASS_SECRET ? { 'x-vercel-protection-bypass': BYPASS_SECRET } : {}) }, tags: { name: 'POST /auth/login', workload: 'resident' }, timeout: '30s' },
   );
   const body = parseJson(response);
   const okay = check(response, {
@@ -128,7 +130,7 @@ function loginAdmin() {
       username: testData.admin.username,
       password: testData.admin.password,
     }),
-    { headers: { 'Content-Type': 'application/json' }, tags: { name: 'POST /auth/login admin', workload: 'administrator' }, timeout: '30s' },
+    { headers: { 'Content-Type': 'application/json', ...(BYPASS_SECRET ? { 'x-vercel-protection-bypass': BYPASS_SECRET } : {}) }, tags: { name: 'POST /auth/login admin', workload: 'administrator' }, timeout: '30s' },
   );
   const body = parseJson(response);
   if (!check(response, { 'admin login returns 200': (r) => r.status === 200 && !!body.token })) {
@@ -144,6 +146,12 @@ let iteration = 0;
 
 export function setup() {
   if (!BASE_URL) throw new Error('Set BASE_URL to the staging backend base URL, without /api.');
+  if (__ENV.CONFIRM_STAGING_TARGET !== 'true') {
+    throw new Error('Set CONFIRM_STAGING_TARGET=true only after confirming this is a dedicated staging backend and database, never production.');
+  }
+  if (TARGET_VUS > 100 && __ENV.ALLOW_HIGH_LOAD !== 'true') {
+    throw new Error('TARGET_VUS > 100 requires ALLOW_HIGH_LOAD=true after smoke testing and checking database monitoring.');
+  }
   if (!Number.isInteger(TARGET_VUS) || TARGET_VUS < 1 || TARGET_VUS > 10000) {
     throw new Error('TARGET_VUS must be an integer from 1 to 10000.');
   }
@@ -153,7 +161,7 @@ export function setup() {
   if (BASE_URL.includes('backend-nitin-fa90.vercel.app') || BASE_URL.includes('backend-git-main-nitin-fa90.vercel.app')) {
     throw new Error('Refusing to run the load test against the known stable production backend alias.');
   }
-  const health = http.get(API + '/health', { timeout: '20s', tags: { name: 'GET /health', workload: 'setup' } });
+  const health = http.get(API + '/health', { headers: BYPASS_SECRET ? { 'x-vercel-protection-bypass': BYPASS_SECRET } : {}, timeout: '20s', tags: { name: 'GET /health', workload: 'setup' } });
   if (health.status !== 200 || parseJson(health).status !== 'ok') {
     throw new Error('Backend health check failed with HTTP ' + health.status + '. Confirm the staging database connection first.');
   }
