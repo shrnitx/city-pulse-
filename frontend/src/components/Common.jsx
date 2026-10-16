@@ -2,7 +2,7 @@ import { Activity, ArrowRight, Check, CheckCheck, CircleAlert, Loader2, MapPin, 
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dialog';
-export const Brand=({light=false,id='citypulse-brand'})=><Link data-testid={id} to="/" className={`brand ${light?'brand-light':''}`}><span className="brand-mark"><Activity size={25}/></span><span>CityPulse<span className="brand-dot">.</span></span></Link>;
+export const Brand=({light=false,id='drcivic-brand'})=><Link data-testid={id} to="/" className={`brand ${light?'brand-light':''}`}><span className="brand-mark"><Activity size={25}/></span><span>DRCivic<span className="brand-dot">.</span></span></Link>;
 export const Btn=({children,id,variant='default',busy,...props})=><Button data-testid={id} variant={variant} {...props} disabled={busy||props.disabled}>{busy?<Loader2 size={16} className="spin"/>:null}{children}</Button>;
 export const Status=({value,id})=><span data-testid={id||`status-${value.toLowerCase().replaceAll(' ','-')}`} className={`status status-${value.toLowerCase().replaceAll(' ','-')}`}><span className="status-dot"/>{value}</span>;
 export const Verified=({id})=><span className="verified-badge" data-testid={id}><ShieldCheck size={13}/> ADMIN VERIFIED</span>;

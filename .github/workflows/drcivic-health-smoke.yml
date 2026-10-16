@@ -1,12 +1,15 @@
-name: CityPulse preview health smoke
+name: DRCivic preview health smoke
 on:
   push:
     branches:
       - perf/load-readiness-2026-10-12
       - deploy/fix-vercel-frontend-2026-10-16
+      - rebrand/drcivic-final
+      - rebrand/drcivic
+      - rebrand/drcivic-ready
     paths:
       - 'loadtest/health-smoke.js'
-      - '.github/workflows/citypulse-health-smoke.yml'
+      - '.github/workflows/drcivic-health-smoke.yml'
   workflow_dispatch:
 
 permissions:

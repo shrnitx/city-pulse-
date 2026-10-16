@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Provision an isolated CityPulse load-test society and deterministic residents.
+"""Provision an isolated DRCivic load-test society and deterministic residents.
 
 This script creates real test records through the API. Run it ONLY against a
 staging backend connected to a disposable/dedicated MongoDB database.
@@ -62,13 +62,13 @@ def request_json(base_url: str, method: str, path: str, payload=None):
 
 def main() -> int:
     base_url = require_env("BASE_URL").rstrip("/")
-    confirmation = require_env("CITYPULSE_LOADTEST_CONFIRM")
+    confirmation = require_env("DRCIVIC_LOADTEST_CONFIRM")
     count = int(require_env("LOADTEST_USER_COUNT"))
     workers = int(os.environ.get("LOADTEST_PROVISION_WORKERS", "8"))
 
     if confirmation != "YES_I_AM_USING_A_DEDICATED_TEST_DATABASE":
         raise SystemExit(
-            "Refusing to create test data. Set CITYPULSE_LOADTEST_CONFIRM="
+            "Refusing to create test data. Set DRCIVIC_LOADTEST_CONFIRM="
             "YES_I_AM_USING_A_DEDICATED_TEST_DATABASE only after verifying "
             "that this backend uses a dedicated, disposable test database."
         )
@@ -102,7 +102,7 @@ def main() -> int:
     run_id = f"{int(time.time())}-{secrets.token_hex(3)}"
     password = "CP-LoadTest-" + secrets.token_urlsafe(18)
     society_payload = {
-        "name": f"CityPulse Load Test {run_id}",
+        "name": f"DRCivic Load Test {run_id}",
         "location": "Load Test District",
         "address": f"Dedicated test site, run {run_id}",
         "population": max(count, 1),

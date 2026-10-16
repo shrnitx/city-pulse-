@@ -1,16 +1,16 @@
-# CityPulse — Emergent Implementation Handoff
+# DRCivic — Emergent Implementation Handoff
 
 ## Purpose
 
-Use this ZIP as the existing CityPulse website baseline. **Do not delete, replace, or rewrite the existing files just to reproduce the screenshots.** Preserve the existing `code.html`, `DESIGN.md`, and `screen.png`, then evolve the product around them.
+Use this ZIP as the existing DRCivic website baseline. **Do not delete, replace, or rewrite the existing files just to reproduce the screenshots.** Preserve the existing `code.html`, `DESIGN.md`, and `screen.png`, then evolve the product around them.
 
 The visual references in `design-references/` are reference images only. Recreate their layout, hierarchy, spacing, component structure, and visual language with real HTML/CSS/JS components. Do not turn the screenshots into a single flat background image.
 
 ## Reference priority
 
 1. **Existing `screen.png`** — preserve as the original baseline from the supplied ZIP. Do not remove it.
-2. **`design-references/citypulse-design-reference-high-resolution.png`** — primary visual reference for the complete landing → society access → FAQ → user dashboard → problem detail → admin dashboard journey.
-3. **`design-references/citypulse-design-reference-latest.png`** — secondary visual reference for the polished component treatment, civic dashboard cards, problem feed, and role-based screens.
+2. **`design-references/drcivic-design-reference-high-resolution.png`** — primary visual reference for the complete landing → society access → FAQ → user dashboard → problem detail → admin dashboard journey.
+3. **`design-references/drcivic-design-reference-latest.png`** — secondary visual reference for the polished component treatment, civic dashboard cards, problem feed, and role-based screens.
 
 A previous oversized collage reference was intentionally discarded. **Do not add or use that discarded reference.**
 
@@ -19,7 +19,7 @@ A previous oversized collage reference was intentionally discarded. **Do not add
 Build the public experience in this order:
 
 ### 1. Landing / Hero
-- CityPulse brand and concise civic-tech message.
+- DRCivic brand and concise civic-tech message.
 - Reserve a large, clearly marked area for a future animated city/data visualization.
 - The animation itself is intentionally NOT part of this task.
 - Primary actions: `Enter Society` and `Create Society`.
@@ -54,7 +54,7 @@ Route each role to the correct dashboard.
 
 ### 3. FAQ
 Use an accordion FAQ section explaining:
-- What CityPulse is
+- What DRCivic is
 - How residents report problems
 - What AI does
 - What AI does NOT decide
@@ -69,7 +69,7 @@ Use an accordion FAQ section explaining:
 Use the reference images for the structure, but implement it as real UI.
 
 Top:
-- CityPulse
+- DRCivic
 - Society name
 - Society code/population where useful
 - User profile

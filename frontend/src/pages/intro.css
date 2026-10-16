@@ -1,4 +1,4 @@
-/* CityPulse cinematic landing intro; isolated from workspace styles. */
+/* DRCivic cinematic landing intro; isolated from workspace styles. */
 .cp-intro{position:absolute;inset:0;z-index:6;overflow:hidden;pointer-events:none;opacity:1;transition:opacity .7s ease}
 .cp-intro.fade-out{opacity:0}
 .cp-intro-city{position:absolute;inset:0;background-size:cover;background-position:center 55%;transform:scale(1.045);filter:blur(18px) brightness(.32) saturate(.85);transition:transform 2.2s cubic-bezier(.22,.61,.36,1),filter 2.2s cubic-bezier(.22,.61,.36,1);will-change:transform,filter}

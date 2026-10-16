@@ -1,17 +1,17 @@
-# CityPulse 10,000-user API load test
+# DRCivic 10,000-user API load test
 
-This test harness simulates 10,000 concurrent virtual residents using CityPulse, continuously reading the feed, submitting clustered reports, following cases and occasionally commenting. A synthetic administrator verifies incoming cases while resolving only a portion, so resolved, in-progress and unresolved work coexists throughout the run.
+This test harness simulates 10,000 concurrent virtual residents using DRCivic, continuously reading the feed, submitting clustered reports, following cases and occasionally commenting. A synthetic administrator verifies incoming cases while resolving only a portion, so resolved, in-progress and unresolved work coexists throughout the run.
 
 It contains:
 - \`provision_users.py\`: safely creates one isolated test society and up to 10,000 synthetic residents through the API.
-- \`citypulse_10k.js\`: k6 workload, configurable ramp-up, ongoing resident traffic, report creation, case-following, comments, admin triage, metrics and pass/fail thresholds.
+- \`drcivic_10k.js\`: k6 workload, configurable ramp-up, ongoing resident traffic, report creation, case-following, comments, admin triage, metrics and pass/fail thresholds.
 - \`users.json\`: generated private credentials/configuration. It is ignored by git; never upload or commit it.
 
 ## Important: isolate the environment first
 
 1. Deploy this branch to a **Preview/staging backend**.
-2. Configure that Preview backend with a **dedicated disposable MongoDB database**. Set \`MONGO_URL\` to the test cluster URI and \`DB_NAME=citypulse_loadtest\` (or another database used only for this run). Confirm that the preview environment does not inherit the production database URI.
-3. Configure the remaining backend startup variables needed by the application, including \`CORS_ORIGINS\`, \`CITYPULSE_DEMO_PASSWORD\` and \`CITYPULSE_OWNER_EMAIL\`.
+2. Configure that Preview backend with a **dedicated disposable MongoDB database**. Set \`MONGO_URL\` to the test cluster URI and \`DB_NAME=drcivic_loadtest\` (or another database used only for this run). Confirm that the preview environment does not inherit the production database URI.
+3. Configure the remaining backend startup variables needed by the application, including \`CORS_ORIGINS\`, \`DRCIVIC_DEMO_PASSWORD\` and \`DRCIVIC_OWNER_EMAIL\`.
 4. Confirm \`GET /api/health\` returns HTTP 200 against the staging URL.
 5. Never paste database URIs, passwords or Vercel bypass secrets into chat, source files or logs. Keep them in local environment variables or Vercel settings.
 
@@ -38,7 +38,7 @@ macOS/Linux:
 export BASE_URL="https://YOUR-STAGING-BACKEND-URL"
 export LOADTEST_USER_COUNT=10000
 export LOADTEST_PROVISION_WORKERS=8
-export CITYPULSE_LOADTEST_CONFIRM="YES_I_AM_USING_A_DEDICATED_TEST_DATABASE"
+export DRCIVIC_LOADTEST_CONFIRM="YES_I_AM_USING_A_DEDICATED_TEST_DATABASE"
 python provision_users.py
 \`\`\`
 
@@ -48,7 +48,7 @@ Windows PowerShell:
 $env:BASE_URL = "https://YOUR-STAGING-BACKEND-URL"
 $env:LOADTEST_USER_COUNT = "10000"
 $env:LOADTEST_PROVISION_WORKERS = "8"
-$env:CITYPULSE_LOADTEST_CONFIRM = "YES_I_AM_USING_A_DEDICATED_TEST_DATABASE"
+$env:DRCIVIC_LOADTEST_CONFIRM = "YES_I_AM_USING_A_DEDICATED_TEST_DATABASE"
 python .\provision_users.py
 \`\`\`
 
@@ -63,19 +63,19 @@ Begin with 25 VUs and only then increase the test size. Every k6 run requires an
 \`\`\`bash
 # First smoke test: 25 virtual users, 1 minute of steady traffic.
 export BASE_URL="https://YOUR-STAGING-BACKEND-URL"
-k6 run citypulse_10k.js \
+k6 run drcivic_10k.js \
   -e CONFIRM_STAGING_TARGET=true \
   -e TARGET_VUS=25 \
   -e RAMP_DURATION=30s \
   -e HOLD_DURATION=1m
 
 # Gradually grow the load. Inspect the prior results and database health before each step.
-k6 run citypulse_10k.js -e CONFIRM_STAGING_TARGET=true -e TARGET_VUS=100 -e RAMP_DURATION=1m -e HOLD_DURATION=3m
-k6 run citypulse_10k.js -e CONFIRM_STAGING_TARGET=true -e ALLOW_HIGH_LOAD=true -e TARGET_VUS=500 -e RAMP_DURATION=3m -e HOLD_DURATION=5m
-k6 run citypulse_10k.js -e CONFIRM_STAGING_TARGET=true -e ALLOW_HIGH_LOAD=true -e TARGET_VUS=1000 -e RAMP_DURATION=5m -e HOLD_DURATION=10m
-k6 run citypulse_10k.js -e CONFIRM_STAGING_TARGET=true -e ALLOW_HIGH_LOAD=true -e TARGET_VUS=2500 -e RAMP_DURATION=5m -e HOLD_DURATION=10m
-k6 run citypulse_10k.js -e CONFIRM_STAGING_TARGET=true -e ALLOW_HIGH_LOAD=true -e TARGET_VUS=5000 -e RAMP_DURATION=10m -e HOLD_DURATION=15m
-k6 run citypulse_10k.js -e CONFIRM_STAGING_TARGET=true -e ALLOW_HIGH_LOAD=true -e TARGET_VUS=10000 -e RAMP_DURATION=10m -e HOLD_DURATION=20m
+k6 run drcivic_10k.js -e CONFIRM_STAGING_TARGET=true -e TARGET_VUS=100 -e RAMP_DURATION=1m -e HOLD_DURATION=3m
+k6 run drcivic_10k.js -e CONFIRM_STAGING_TARGET=true -e ALLOW_HIGH_LOAD=true -e TARGET_VUS=500 -e RAMP_DURATION=3m -e HOLD_DURATION=5m
+k6 run drcivic_10k.js -e CONFIRM_STAGING_TARGET=true -e ALLOW_HIGH_LOAD=true -e TARGET_VUS=1000 -e RAMP_DURATION=5m -e HOLD_DURATION=10m
+k6 run drcivic_10k.js -e CONFIRM_STAGING_TARGET=true -e ALLOW_HIGH_LOAD=true -e TARGET_VUS=2500 -e RAMP_DURATION=5m -e HOLD_DURATION=10m
+k6 run drcivic_10k.js -e CONFIRM_STAGING_TARGET=true -e ALLOW_HIGH_LOAD=true -e TARGET_VUS=5000 -e RAMP_DURATION=10m -e HOLD_DURATION=15m
+k6 run drcivic_10k.js -e CONFIRM_STAGING_TARGET=true -e ALLOW_HIGH_LOAD=true -e TARGET_VUS=10000 -e RAMP_DURATION=10m -e HOLD_DURATION=20m
 \`\`\`
 
 The final 10k run lasts approximately 31 minutes: 10 minutes to ramp up, 20 minutes at 10,000 VUs, then one minute to ramp down. The default report probability is 1% per resident iteration; with 10,000 VUs and the default think time, reports arrive continuously rather than all at once. The administrator verifies new cases and:

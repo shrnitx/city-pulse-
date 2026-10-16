@@ -10,7 +10,7 @@
     "design_issues": []
   },
   "test_report_links": [
-    "/app/backend/tests/test_citypulse_api.py",
+    "/app/backend/tests/test_drcivic_api.py",
     "/app/test_reports/pytest/pytest_results.xml"
   ],
   "action_items": [
@@ -22,7 +22,7 @@
     "No critical security leak found in tested read endpoints (password_hash/token_hash absent in tested responses)."
   ],
   "updated_files": [
-    "/app/backend/tests/test_citypulse_api.py",
+    "/app/backend/tests/test_drcivic_api.py",
     "/app/test_reports/iteration_1.json"
   ],
   "success_rate": {

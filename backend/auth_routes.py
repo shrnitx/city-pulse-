@@ -96,7 +96,7 @@ async def logout(user=Depends(require('read')), credentials: HTTPAuthorizationCr
 
 @router.get('/auth/demo')
 async def demo():
-    return {'society_code': 'GV-48291', 'password': os.environ['CITYPULSE_DEMO_PASSWORD'], 'accounts': [{'username':'elena','name':'Elena Vance','role':'resident'}, {'username':'blockb.admin','name':'Arjun Mehta','role':'admin'}, {'username':'owner','name':'Society Owner','role':'initial_admin'}]}
+    return {'society_code': 'GV-48291', 'password': os.environ['DRCIVIC_DEMO_PASSWORD'], 'accounts': [{'username':'elena','name':'Elena Vance','role':'resident'}, {'username':'blockb.admin','name':'Arjun Mehta','role':'admin'}, {'username':'owner','name':'Society Owner','role':'initial_admin'}]}
 
 class ProfileEdit(BaseModel):
     name: str = Field(min_length=2, max_length=80)
