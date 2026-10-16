@@ -97,10 +97,8 @@ function parseJson(response) {
 }
 
 function loginResident() {
-  const userId = exec.vu.idInTest;
-  if (userId < 1 || userId > testData.resident_count) {
-    throw new Error('Virtual user ID exceeds provisioned resident count; increase LOADTEST_USER_COUNT.');
-  }
+  // VU IDs are unique across scenarios, so wrap only within the resident account pool.
+  const userId = ((exec.vu.idInTest - 1) % testData.resident_count) + 1;
   const username = 'loadresident' + String(userId).padStart(5, '0');
   const response = http.post(
     API + '/auth/login',
