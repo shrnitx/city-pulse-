@@ -8,3 +8,77 @@
  body{@apply bg-background text-foreground;margin:0;font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.55}
  button,input,select,textarea{font:inherit}button,a,input,textarea,select{-webkit-tap-highlight-color:transparent}button,a{transition:background-color .18s,color .18s,border-color .18s,opacity .18s}button:not(:disabled){cursor:pointer}button:disabled{cursor:not-allowed}h1,h2,h3,h4{font-family:'Plus Jakarta Sans',sans-serif;line-height:1.35}a{color:inherit;text-decoration:none}svg{flex-shrink:0}::selection{background:#d2ece3}button:focus-visible,a:focus-visible{outline:2px solid #008b7a;outline-offset:4px}input,textarea,select{width:100%;background:#fff;border:1px solid #d5dfe0;border-radius:5px;min-height:43px;padding:10px 12px;outline:none;transition:border-color .18s,box-shadow .18s}input:focus,select:focus,textarea:focus{border-color:#008577;box-shadow:0 0 0 3px #00857712}textarea{resize:vertical;min-height:110px}input::placeholder,textarea::placeholder{color:#8a969b}small{font-size:12px}img{max-width:100%}h1,h2,h3,p{margin:0}
 }
+
+/* DataRain canvas effect — adapted to DRCivic's navy / teal / mint identity. */
+:root {
+  --dr-bg-0: #071a23;
+  --dr-bg-1: #0a2027;
+  --dr-bg-2: #10332f;
+  --dr-calm: #20b896;
+  --dr-mid: #4bc9aa;
+  --dr-hot: #a0e4d0;
+  --dr-core: #edfff8;
+  --dr-vignette: 0.12;
+  --dr-grain: 0.025;
+  --dr-bloom-blur: 8px;
+  --dr-bloom-opacity: 0.36;
+}
+.dr-root {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: transparent;
+  isolation: isolate;
+}
+.dr-root--contained {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+.dr-root .dr-main,
+.dr-root .dr-bloom {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.dr-root .dr-main {
+  opacity: 0.78;
+  mix-blend-mode: screen;
+}
+.dr-root .dr-bloom {
+  filter: blur(var(--dr-bloom-blur));
+  opacity: var(--dr-bloom-opacity);
+  transform: scale(1.025);
+}
+.dr-root .dr-vignette,
+.dr-root .dr-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.dr-root .dr-vignette {
+  opacity: var(--dr-vignette);
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(3, 16, 20, 0.78) 100%);
+}
+.dr-root .dr-grain {
+  opacity: var(--dr-grain);
+  background-image: radial-gradient(rgba(255,255,255,.48) .45px, transparent .6px);
+  background-size: 4px 4px;
+  mix-blend-mode: soft-light;
+}
+.landing-hero .landing-hero-data-rain {
+  z-index: -1;
+  opacity: 0.58;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dr-root .dr-main,
+  .dr-root .dr-bloom {
+    animation: none !important;
+  }
+}
