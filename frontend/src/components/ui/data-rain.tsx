@@ -244,7 +244,6 @@ export default function DataRain(props: DataRainProps) {
           particle.x < -32 ||
           particle.x > width + 32
         ) {
-          const replacement = makeParticle(particle.color, true);
           particle.x = random() * width;
           particle.y = -random() * 70;
           particle.vx = 0;
