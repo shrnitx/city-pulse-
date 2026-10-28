@@ -272,9 +272,16 @@ export default function DataRain(props: DataRainProps) {
 
     const onPointerMove = (event: PointerEvent): void => {
       const bounds = root.getBoundingClientRect();
-      pointerX = event.clientX - bounds.left;
-      pointerY = event.clientY - bounds.top;
-      pointerActive = true;
+      const inside =
+        event.clientX >= bounds.left &&
+        event.clientX <= bounds.right &&
+        event.clientY >= bounds.top &&
+        event.clientY <= bounds.bottom;
+      pointerActive = inside;
+      if (inside) {
+        pointerX = event.clientX - bounds.left;
+        pointerY = event.clientY - bounds.top;
+      }
     };
     const onPointerLeave = (): void => {
       pointerActive = false;
